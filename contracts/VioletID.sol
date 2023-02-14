@@ -33,6 +33,10 @@ contract VioletID is ERC1155, Ownable, IVioletID {
         return balanceOf(account, tokenId) > 0;
     }
 
+    function numberOfRegisteredAccounts() public view returns (uint256) {
+        return _uniqueOwners[tokenId];
+    }
+
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) public override {
         revert("VioletID: transfers disallowed");
     }
