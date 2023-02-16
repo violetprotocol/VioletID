@@ -2,6 +2,7 @@ name: "CI"
 
 env:
   DOTENV_CONFIG_PATH: "./.env.example"
+  MNEMONIC: "lava elegant rate reveal test size bachelor cross skin law all witness world spice clown"
 
 on:
   workflow_dispatch:
