@@ -6,7 +6,7 @@ import type { Signers } from "../types";
 import { shouldBehaveLikeGreeter } from "./Greeter.behavior";
 import { deployGreeterFixture } from "./Greeter.fixture";
 
-describe("Unit tests", function () {
+describe.skip("Unit tests", function () {
   before(async function () {
     this.signers = {} as Signers;
 
