@@ -1,4 +1,4 @@
-const deployVioletID = require("./deploy/violetID");
-const accounts = require("./accounts");
+import accounts from "./accounts";
+import deployVioletID from "./deploy/violetID";
 
 export { accounts, deployVioletID };

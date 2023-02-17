@@ -6,10 +6,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./IVioletID.sol";
 
 contract VioletID is ERC1155, Ownable, IVioletID {
-    // TokenId of VioletID token is 0
-    uint256 constant tokenId = 0;
+    // Token ID of VioletID token is 0
+    uint256 public constant TOKEN_ID = 0;
 
-    // Mapping from tokenId to number of addresses that own at least 1
+    // Mapping from TOKEN_ID to number of addresses that own at least 1
     mapping(uint256 => uint256) private _uniqueOwners;
 
     modifier onlyUnregistered() {
@@ -17,27 +17,28 @@ contract VioletID is ERC1155, Ownable, IVioletID {
         _;
     }
 
+    // solhint-disable-next-line
     constructor(string memory metadataURI) ERC1155(metadataURI) Ownable() {}
 
     function flag(address account) external onlyOwner onlyUnregistered {
-        _mint(account, tokenId, 1, "");
-        _uniqueOwners[tokenId] = _uniqueOwners[tokenId] + 1;
+        _mint(account, TOKEN_ID, 1, "");
+        _uniqueOwners[TOKEN_ID] = _uniqueOwners[TOKEN_ID] + 1;
     }
 
     function unflag(address account) external onlyOwner {
-        _burn(account, tokenId, 1);
-        _uniqueOwners[tokenId] = _uniqueOwners[tokenId] - 1;
+        _burn(account, TOKEN_ID, 1);
+        _uniqueOwners[TOKEN_ID] = _uniqueOwners[TOKEN_ID] - 1;
     }
 
     function isAccountRegistered(address account) public view returns (bool) {
-        return balanceOf(account, tokenId) > 0;
+        return balanceOf(account, TOKEN_ID) > 0;
     }
 
     function numberOfRegisteredAccounts() public view returns (uint256) {
-        return _uniqueOwners[tokenId];
+        return _uniqueOwners[TOKEN_ID];
     }
 
-    function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) public override {
+    function safeTransferFrom(address, address, uint256, uint256, bytes memory) public override {
         revert("VioletID: transfers disallowed");
     }
 }

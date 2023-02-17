@@ -17,3 +17,5 @@ task("deploy:VioletID")
     const tx = await violetId.transferOwnership(taskArguments.owner);
     await tx.wait();
   });
+
+export default {};
