@@ -23,6 +23,7 @@ contract VioletID is
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
+        initialize();
         _disableInitializers();
     }
 
@@ -33,6 +34,8 @@ contract VioletID is
         __ERC1155Burnable_init();
         __ERC1155Supply_init();
         __UUPSUpgradeable_init();
+
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         _setRoleAdmin(OWNER_ROLE, OWNER_ROLE); // OWNER_ROLE can change OWNER_ROLE
         _setRoleAdmin(ADMIN_ROLE, OWNER_ROLE); // OWNER_ROLE can change ADMIN_ROLE
