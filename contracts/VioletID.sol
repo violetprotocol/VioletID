@@ -18,7 +18,15 @@ contract VioletID is
     ERC1155SupplyUpgradeable,
     UUPSUpgradeable
 {
+    /// @notice Owner role for:
+    ///     - Upgrading
+    ///     - Pausing
+    ///     - Role Managing
+    ///     - Setting URI
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
+    /// @notice Admin role for:
+    ///     - Minting
+    ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
