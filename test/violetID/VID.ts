@@ -3,25 +3,27 @@ import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signe
 import { ethers } from "hardhat";
 
 import type { Signers } from "../types";
-import { shouldBehaveLikeGreeter } from "./Greeter.behavior";
-import { deployGreeterFixture } from "./Greeter.fixture";
+import { shouldBehaveLikeVioletID } from "./VID.behavior";
+import { deployVioletIDFixture } from "./VID.fixture";
 
-describe.skip("Unit tests", function () {
+describe("VioletID Unit tests", function () {
   before(async function () {
     this.signers = {} as Signers;
 
     const signers: SignerWithAddress[] = await ethers.getSigners();
-    this.signers.admin = signers[0];
+    this.signers.owner = signers[0];
+    this.signers.admin = signers[1];
+    this.signers.user = signers[2];
 
     this.loadFixture = loadFixture;
   });
 
-  describe("Greeter", function () {
+  describe("VioletID", function () {
     beforeEach(async function () {
-      const { greeter } = await this.loadFixture(deployGreeterFixture);
-      this.greeter = greeter;
+      const { violetID } = await this.loadFixture(deployVioletIDFixture);
+      this.violetID = violetID;
     });
 
-    shouldBehaveLikeGreeter();
+    shouldBehaveLikeVioletID();
   });
 });

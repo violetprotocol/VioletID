@@ -1,44 +1,100 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./IVioletID.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract VioletID is ERC1155, Ownable, IVioletID {
-    // Token ID of VioletID token is 0
-    uint256 public constant TOKEN_ID = 0;
+contract VioletID is
+    Initializable,
+    ERC1155Upgradeable,
+    AccessControlUpgradeable,
+    PausableUpgradeable,
+    ERC1155BurnableUpgradeable,
+    ERC1155SupplyUpgradeable,
+    UUPSUpgradeable
+{
+    /// @notice Owner role for:
+    ///     - Upgrading
+    ///     - Pausing
+    ///     - Role Managing
+    ///     - Setting URI
+    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
+    /// @notice Admin role for:
+    ///     - Minting
+    ///     - Burning
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    // Mapping from TOKEN_ID to number of addresses that own at least 1
-    mapping(uint256 => uint256) private _uniqueOwners;
-
-    modifier onlyUnregistered() {
-        require(!isAccountRegistered(msg.sender), "VioletID: account is already registered");
-        _;
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        initialize();
+        _disableInitializers();
     }
 
-    // solhint-disable-next-line
-    constructor(string memory metadataURI) ERC1155(metadataURI) Ownable() {}
+    function initialize() public initializer {
+        __ERC1155_init("");
+        __AccessControl_init();
+        __Pausable_init();
+        __ERC1155Burnable_init();
+        __ERC1155Supply_init();
+        __UUPSUpgradeable_init();
 
-    function flag(address account) external onlyOwner onlyUnregistered {
-        _mint(account, TOKEN_ID, 1, "");
-        _uniqueOwners[TOKEN_ID] = _uniqueOwners[TOKEN_ID] + 1;
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        _setRoleAdmin(OWNER_ROLE, OWNER_ROLE); // OWNER_ROLE can change OWNER_ROLE
+        _setRoleAdmin(ADMIN_ROLE, OWNER_ROLE); // OWNER_ROLE can change ADMIN_ROLE
+        _grantRole(OWNER_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
     }
 
-    function unflag(address account) external onlyOwner {
-        _burn(account, TOKEN_ID, 1);
-        _uniqueOwners[TOKEN_ID] = _uniqueOwners[TOKEN_ID] - 1;
+    function setURI(string memory newuri) public onlyRole(OWNER_ROLE) {
+        _setURI(newuri);
     }
 
-    function isAccountRegistered(address account) public view returns (bool) {
-        return balanceOf(account, TOKEN_ID) > 0;
+    function pause() public onlyRole(OWNER_ROLE) {
+        _pause();
     }
 
-    function numberOfRegisteredAccounts() public view returns (uint256) {
-        return _uniqueOwners[TOKEN_ID];
+    function unpause() public onlyRole(OWNER_ROLE) {
+        _unpause();
     }
 
-    function safeTransferFrom(address, address, uint256, uint256, bytes memory) public override {
-        revert("VioletID: transfers disallowed");
+    function mint(address account, uint256 id, uint256 amount, bytes memory data) public onlyRole(ADMIN_ROLE) {
+        _mint(account, id, amount, data);
+    }
+
+    function mintBatch(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) public onlyRole(ADMIN_ROLE) {
+        _mintBatch(to, ids, amounts, data);
+    }
+
+    function _beforeTokenTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal override(ERC1155Upgradeable, ERC1155SupplyUpgradeable) whenNotPaused {
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+    }
+
+    // solhint-disable-next-line no-empty-blocks
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(OWNER_ROLE) {}
+
+    // The following functions are overrides required by Solidity.
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC1155Upgradeable, AccessControlUpgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 }
