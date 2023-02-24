@@ -87,6 +87,7 @@ contract VioletID is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
+    // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(OWNER_ROLE) {}
 
     // The following functions are overrides required by Solidity.
