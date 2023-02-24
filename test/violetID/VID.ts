@@ -6,7 +6,7 @@ import type { Signers } from "../types";
 import { shouldBehaveLikeVioletID } from "./VID.behavior";
 import { deployVioletIDFixture } from "./VID.fixture";
 
-describe.skip("Unit tests", function () {
+describe("VioletID Unit tests", function () {
   before(async function () {
     this.signers = {} as Signers;
 
