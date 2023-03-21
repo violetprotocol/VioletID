@@ -36,4 +36,8 @@ contract MockContract is IERC1155ReceiverUpgradeable {
     function transferVID(address to) external {
         IERC1155Upgradeable(_violetId).safeTransferFrom(address(this), to, 1, 1, "");
     }
+
+    function transferVIDBatch(address to) external {
+        IERC1155Upgradeable(_violetId).safeBatchTransferFrom(address(this), to, new uint256[](1), new uint256[](1), "");
+    }
 }

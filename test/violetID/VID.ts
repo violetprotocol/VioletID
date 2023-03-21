@@ -20,8 +20,9 @@ describe("VioletID Unit tests", function () {
 
   describe("VioletID", function () {
     beforeEach(async function () {
-      const { violetID } = await this.loadFixture(deployVioletIDFixture);
+      const { violetID, mockContract } = await this.loadFixture(deployVioletIDFixture);
       this.violetID = violetID;
+      this.mockContract = mockContract;
     });
 
     shouldBehaveLikeVioletID();
