@@ -31,8 +31,8 @@ contract VioletID is
     ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    uint256 internal constant EOA_REGISTRATION_TOKENID = 0;
-    uint256 internal constant CONTRACT_REGISTRATION_TOKENID = 1;
+    uint256 public constant EOA_REGISTRATION_TOKENID = 0;
+    uint256 public constant CONTRACT_REGISTRATION_TOKENID = 1;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -97,6 +97,29 @@ contract VioletID is
 
     function numberOfRegisteredContracts() external view returns (uint256) {
         return totalSupply(CONTRACT_REGISTRATION_TOKENID);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) public virtual override {
+        revert("transfers disallowed");
+    }
+
+    /**
+     * @dev See {IERC1155-safeBatchTransferFrom}.
+     */
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) public virtual override {
+        revert("transfers disallowed");
     }
 
     function _beforeTokenTransfer(
