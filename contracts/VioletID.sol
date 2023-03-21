@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155Burn
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "./IVioletID.sol";
 
 contract VioletID is
     Initializable,
@@ -16,7 +17,8 @@ contract VioletID is
     PausableUpgradeable,
     ERC1155BurnableUpgradeable,
     ERC1155SupplyUpgradeable,
-    UUPSUpgradeable
+    UUPSUpgradeable,
+    IVioletID
 {
     /// @notice Owner role for:
     ///     - Upgrading
@@ -28,6 +30,9 @@ contract VioletID is
     ///     - Minting
     ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
+    uint256 internal constant EOA_REGISTRATION_TOKENID = 0;
+    uint256 internal constant CONTRACT_REGISTRATION_TOKENID = 1;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -63,17 +68,35 @@ contract VioletID is
         _unpause();
     }
 
-    function mint(address account, uint256 id, uint256 amount, bytes memory data) public onlyRole(ADMIN_ROLE) {
-        _mint(account, id, amount, data);
+    function flag(address account, bytes memory data) public override onlyRole(ADMIN_ROLE) {
+        bool isContract = account.code.length > 0;
+        uint256 tokenId = isContract ? CONTRACT_REGISTRATION_TOKENID : EOA_REGISTRATION_TOKENID;
+
+        _mint(account, tokenId, 1, data);
     }
 
-    function mintBatch(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) public onlyRole(ADMIN_ROLE) {
-        _mintBatch(to, ids, amounts, data);
+    function unflag(address account, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
+        bool isContract = account.code.length > 0;
+        uint256 tokenId = isContract ? CONTRACT_REGISTRATION_TOKENID : EOA_REGISTRATION_TOKENID;
+
+        _burn(account, tokenId, 1);
+        emit AccountDeregistered(account, reason);
+    }
+
+    function isAccountRegistered(address account) external view returns (bool) {
+        return balanceOf(account, EOA_REGISTRATION_TOKENID) > 0;
+    }
+
+    function isContractRegistered(address contractAddress) external view returns (bool) {
+        return balanceOf(contractAddress, CONTRACT_REGISTRATION_TOKENID) > 0;
+    }
+
+    function numberOfRegisteredAccounts() external view returns (uint256) {
+        return totalSupply(EOA_REGISTRATION_TOKENID);
+    }
+
+    function numberOfRegisteredContracts() external view returns (uint256) {
+        return totalSupply(CONTRACT_REGISTRATION_TOKENID);
     }
 
     function _beforeTokenTransfer(
