@@ -447,35 +447,51 @@ export function shouldBehaveLikeVioletID(): void {
             .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.connect(this.signers.user).isRegistered(this.signers.user.address)).to.be.true;
+        expect(
+          await this.violetID
+            .connect(this.signers.user)
+            .isRegistered(this.signers.user.address, this.BASE_REGISTRATION_TOKENID),
+        ).to.be.true;
       });
 
-      it("user should not be base registered", async function () {
+      it("user should not be registered", async function () {
         await expect(
           this.violetID.connect(this.signers.admin).flag(this.signers.user.address, 42, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.connect(this.signers.user).isRegistered(this.signers.user.address)).to.be.false;
+        expect(
+          await this.violetID
+            .connect(this.signers.user)
+            .isRegistered(this.signers.user.address, this.BASE_REGISTRATION_TOKENID),
+        ).to.be.false;
       });
     });
 
     context("Contract holder", async function () {
-      it("contract should be base registered", async function () {
+      it("contract should be registered", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
             .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.connect(this.signers.user).isRegistered(this.mockContract.address)).to.be.true;
+        expect(
+          await this.violetID
+            .connect(this.signers.user)
+            .isRegistered(this.mockContract.address, this.BASE_REGISTRATION_TOKENID),
+        ).to.be.true;
       });
 
-      it("contract should not be base registered", async function () {
+      it("contract should not be registered", async function () {
         await expect(
           this.violetID.connect(this.signers.admin).flag(this.mockContract.address, 42, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.connect(this.signers.user).isRegistered(this.mockContract.address)).to.be.false;
+        expect(
+          await this.violetID
+            .connect(this.signers.user)
+            .isRegistered(this.mockContract.address, this.BASE_REGISTRATION_TOKENID),
+        ).to.be.false;
       });
     });
   });
