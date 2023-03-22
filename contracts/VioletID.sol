@@ -31,7 +31,7 @@ contract VioletID is
     ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    /// Base Persona ID verification + 2FA TOTP
+    /// Public flag representing an address which enrolled with Violet
     uint256 public constant BASE_VERIFIED_STATUS_TOKENID = 0;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
