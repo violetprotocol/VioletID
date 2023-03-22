@@ -54,6 +54,26 @@ export function shouldBehaveLikeVioletID(): void {
         expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
       });
 
+      it("twice should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.be.revertedWith("account already registered");
+
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+      });
+
       it("as owner should fail", async function () {
         await expect(
           this.violetID
@@ -82,6 +102,26 @@ export function shouldBehaveLikeVioletID(): void {
             .connect(this.signers.admin)
             .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
+
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+      });
+
+      it("twice should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.be.revertedWith("account already registered");
 
         expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
         expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
@@ -168,6 +208,23 @@ export function shouldBehaveLikeVioletID(): void {
         expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
         expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
       });
+
+      it("already unregistered account should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.be.revertedWith("account not registered");
+      });
     });
 
     context("Contract target", async function () {
@@ -227,6 +284,23 @@ export function shouldBehaveLikeVioletID(): void {
 
         expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
         expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+      });
+
+      it("already unregistered account should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.be.revertedWith("account not registered");
       });
     });
   });
@@ -363,6 +437,49 @@ export function shouldBehaveLikeVioletID(): void {
       });
     });
   });
+
+  describe("isRegistered", async function () {
+    context("EOA holder", async function () {
+      it("user should be registered", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.connect(this.signers.user).isRegistered(this.signers.user.address)).to.be.true;
+      });
+
+      it("user should not be base registered", async function () {
+        await expect(
+          this.violetID.connect(this.signers.admin).flag(this.signers.user.address, 42, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.connect(this.signers.user).isRegistered(this.signers.user.address)).to.be.false;
+      });
+    });
+
+    context("Contract holder", async function () {
+      it("contract should be base registered", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.connect(this.signers.user).isRegistered(this.mockContract.address)).to.be.true;
+      });
+
+      it("contract should not be base registered", async function () {
+        await expect(
+          this.violetID.connect(this.signers.admin).flag(this.mockContract.address, 42, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.connect(this.signers.user).isRegistered(this.mockContract.address)).to.be.false;
+      });
+    });
+  });
+
   describe("isBaseRegistered", async function () {
     context("EOA holder", async function () {
       it("user should be base registered", async function () {

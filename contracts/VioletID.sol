@@ -69,12 +69,20 @@ contract VioletID is
     }
 
     function flag(address account, uint256 tokenId, bytes memory data) public override onlyRole(ADMIN_ROLE) {
+        require(!isRegistered(account, tokenId), "account already registered");
+
         _mint(account, tokenId, 1, data);
     }
 
     function unflag(address account, uint256 tokenId, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
+        require(isRegistered(account, tokenId), "account not registered");
+
         _burn(account, tokenId, 1);
         emit AccountDeregistered(account, tokenId, reason);
+    }
+
+    function isRegistered(address account, uint256 tokenId) public view override returns (bool) {
+        return balanceOf(account, tokenId) > 0;
     }
 
     function isBaseRegistered(address account) public view override returns (bool) {

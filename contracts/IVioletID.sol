@@ -8,6 +8,8 @@ interface IVioletID {
 
     function unflag(address account, uint256 tokenId, bytes memory reason) external;
 
+    function isRegistered(address account, uint256 tokenId) external view returns (bool);
+
     function isBaseRegistered(address account) external view returns (bool);
 
     function numberOfBaseRegistered() external view returns (uint256);
