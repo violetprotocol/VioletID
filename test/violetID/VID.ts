@@ -23,6 +23,7 @@ describe("VioletID Unit tests", function () {
       const { violetID, mockContract } = await this.loadFixture(deployVioletIDFixture);
       this.violetID = violetID;
       this.mockContract = mockContract;
+      this.BASE_REGISTRATION_TOKENID = await this.violetID.callStatic.BASE_REGISTRATION_TOKENID();
     });
 
     shouldBehaveLikeVioletID();

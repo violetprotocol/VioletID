@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { toUtf8Bytes } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -47,18 +47,20 @@ export function shouldBehaveLikeVioletID(): void {
     context("EOA target", async function () {
       it("as admin should succeed", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.signers.user.address, "0x00"),
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(1);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(0);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isContractRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
       });
 
       it("as owner should fail", async function () {
         await expect(
-          this.violetID.connect(this.signers.owner).flag(this.signers.user.address, "0x00"),
+          this.violetID
+            .connect(this.signers.owner)
+            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -66,7 +68,9 @@ export function shouldBehaveLikeVioletID(): void {
 
       it("as user should fail", async function () {
         await expect(
-          this.violetID.connect(this.signers.user).flag(this.signers.user.address, "0x00"),
+          this.violetID
+            .connect(this.signers.user)
+            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -76,39 +80,33 @@ export function shouldBehaveLikeVioletID(): void {
     context("Contract target", async function () {
       it("as admin should succeed", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.mockContract.address, "0x00"),
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(0);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(1);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
       });
 
       it("as owner should fail", async function () {
         await expect(
-          this.violetID.connect(this.signers.owner).flag(this.mockContract.address, "0x00"),
+          this.violetID
+            .connect(this.signers.owner)
+            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
-
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(0);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(0);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.false;
       });
 
       it("as user should fail", async function () {
         await expect(
-          this.violetID.connect(this.signers.user).flag(this.mockContract.address, "0x00"),
+          this.violetID
+            .connect(this.signers.user)
+            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
-
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(0);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(0);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.false;
       });
     });
   });
@@ -117,112 +115,120 @@ export function shouldBehaveLikeVioletID(): void {
     context("EOA target", async function () {
       beforeEach("flag", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.signers.user.address, "0x00"),
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
       it("as admin should succeed", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).unflag(this.signers.user.address, "0x00"),
+          this.violetID
+            .connect(this.signers.admin)
+            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(0);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(0);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
       });
 
       it("as admin should emit event", async function () {
-        await expect(this.violetID.connect(this.signers.admin).unflag(this.signers.user.address, "0x00"))
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        )
           .to.emit(this.violetID, "AccountDeregistered")
-          .withArgs(this.signers.user.address, "0x00");
+          .withArgs(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00");
 
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(0);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(0);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
       });
 
       it("as owner should fail", async function () {
         await expect(
-          this.violetID.connect(this.signers.owner).unflag(this.signers.user.address, "0x00"),
+          this.violetID
+            .connect(this.signers.owner)
+            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(1);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(0);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isContractRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
       });
 
       it("as user should fail", async function () {
         await expect(
-          this.violetID.connect(this.signers.user).unflag(this.signers.user.address, "0x00"),
+          this.violetID
+            .connect(this.signers.user)
+            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(1);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(0);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isContractRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
       });
     });
 
     context("Contract target", async function () {
       beforeEach("flag", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.mockContract.address, "0x00"),
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
       it("as admin should succeed", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).unflag(this.mockContract.address, "0x00"),
+          this.violetID
+            .connect(this.signers.admin)
+            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(0);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(0);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
       });
 
       it("as admin should emit event", async function () {
-        await expect(this.violetID.connect(this.signers.admin).unflag(this.mockContract.address, "0x00"))
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        )
           .to.emit(this.violetID, "AccountDeregistered")
-          .withArgs(this.mockContract.address, "0x00");
+          .withArgs(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00");
 
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(0);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(0);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
       });
 
       it("as owner should fail", async function () {
         await expect(
-          this.violetID.connect(this.signers.owner).unflag(this.mockContract.address, "0x00"),
+          this.violetID
+            .connect(this.signers.owner)
+            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(0);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(1);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
       });
 
       it("as user should fail", async function () {
         await expect(
-          this.violetID.connect(this.signers.user).unflag(this.mockContract.address, "0x00"),
+          this.violetID
+            .connect(this.signers.user)
+            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(await this.violetID.callStatic.numberOfRegisteredAccounts()).to.equal(0);
-        expect(await this.violetID.callStatic.numberOfRegisteredContracts()).to.equal(1);
-        expect(await this.violetID.callStatic.isAccountRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
       });
     });
   });
@@ -231,7 +237,9 @@ export function shouldBehaveLikeVioletID(): void {
     context("EOA holder", async function () {
       beforeEach("flag", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.signers.user.address, "0x00"),
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -239,29 +247,43 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .safeTransferFrom(this.signers.user.address, this.signers.admin.address, 0, 1, "0x00"),
+            .safeTransferFrom(
+              this.signers.user.address,
+              this.signers.admin.address,
+              this.BASE_REGISTRATION_TOKENID,
+              1,
+              "0x00",
+            ),
         ).to.be.revertedWith(`transfers disallowed`);
 
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.admin.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.admin.address)).to.be.false;
       });
 
       it("to Contract should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .safeTransferFrom(this.signers.user.address, this.mockContract.address, 0, 1, "0x00"),
+            .safeTransferFrom(
+              this.signers.user.address,
+              this.mockContract.address,
+              this.BASE_REGISTRATION_TOKENID,
+              1,
+              "0x00",
+            ),
         ).to.be.revertedWith(`transfers disallowed`);
 
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.false;
       });
     });
 
     context("Contract holder", async function () {
       beforeEach("flag", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.mockContract.address, "0x00"),
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -270,16 +292,16 @@ export function shouldBehaveLikeVioletID(): void {
           `transfers disallowed`,
         );
 
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
       });
 
       it("to Contract should fail", async function () {
         const anotherMock = await (await ethers.getContractFactory("MockContract")).deploy(this.violetID.address);
         await expect(this.mockContract.transferVID(anotherMock.address)).to.be.revertedWith(`transfers disallowed`);
 
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.true;
-        expect(await this.violetID.callStatic.isContractRegistered(anotherMock.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(anotherMock.address)).to.be.false;
       });
     });
   });
@@ -288,7 +310,9 @@ export function shouldBehaveLikeVioletID(): void {
     context("EOA holder", async function () {
       beforeEach("flag", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.signers.user.address, "0x00"),
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -296,29 +320,43 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .safeBatchTransferFrom(this.signers.user.address, this.signers.admin.address, [0], [1], "0x00"),
+            .safeBatchTransferFrom(
+              this.signers.user.address,
+              this.signers.admin.address,
+              [this.BASE_REGISTRATION_TOKENID],
+              [1],
+              "0x00",
+            ),
         ).to.be.revertedWith(`transfers disallowed`);
 
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.admin.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.admin.address)).to.be.false;
       });
 
       it("to Contract should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .safeTransferFrom(this.signers.user.address, this.mockContract.address, [0], [1], "0x00"),
+            .safeBatchTransferFrom(
+              this.signers.user.address,
+              this.mockContract.address,
+              [this.BASE_REGISTRATION_TOKENID],
+              [1],
+              "0x00",
+            ),
         ).to.be.revertedWith(`transfers disallowed`);
 
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.false;
       });
     });
 
     context("Contract holder", async function () {
       beforeEach("flag", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.mockContract.address, "0x00"),
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -327,8 +365,8 @@ export function shouldBehaveLikeVioletID(): void {
           `transfers disallowed`,
         );
 
-        expect(await this.violetID.callStatic.isAccountRegistered(this.signers.user.address)).to.be.false;
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
       });
 
       it("to Contract should fail", async function () {
@@ -337,8 +375,8 @@ export function shouldBehaveLikeVioletID(): void {
           `transfers disallowed`,
         );
 
-        expect(await this.violetID.callStatic.isContractRegistered(this.mockContract.address)).to.be.true;
-        expect(await this.violetID.callStatic.isContractRegistered(anotherMock.address)).to.be.false;
+        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.isBaseRegistered(anotherMock.address)).to.be.false;
       });
     });
   });

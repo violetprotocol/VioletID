@@ -31,8 +31,8 @@ contract VioletID is
     ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    uint256 public constant EOA_REGISTRATION_TOKENID = 0;
-    uint256 public constant CONTRACT_REGISTRATION_TOKENID = 1;
+    /// Base Persona ID verification + 2FA TOTP
+    uint256 public constant BASE_REGISTRATION_TOKENID = 0;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -68,35 +68,21 @@ contract VioletID is
         _unpause();
     }
 
-    function flag(address account, bytes memory data) public override onlyRole(ADMIN_ROLE) {
-        bool isContract = account.code.length > 0;
-        uint256 tokenId = isContract ? CONTRACT_REGISTRATION_TOKENID : EOA_REGISTRATION_TOKENID;
-
+    function flag(address account, uint256 tokenId, bytes memory data) public override onlyRole(ADMIN_ROLE) {
         _mint(account, tokenId, 1, data);
     }
 
-    function unflag(address account, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
-        bool isContract = account.code.length > 0;
-        uint256 tokenId = isContract ? CONTRACT_REGISTRATION_TOKENID : EOA_REGISTRATION_TOKENID;
-
+    function unflag(address account, uint256 tokenId, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
         _burn(account, tokenId, 1);
-        emit AccountDeregistered(account, reason);
+        emit AccountDeregistered(account, tokenId, reason);
     }
 
-    function isAccountRegistered(address account) external view returns (bool) {
-        return balanceOf(account, EOA_REGISTRATION_TOKENID) > 0;
+    function isBaseRegistered(address account) public view override returns (bool) {
+        return balanceOf(account, BASE_REGISTRATION_TOKENID) > 0;
     }
 
-    function isContractRegistered(address contractAddress) external view returns (bool) {
-        return balanceOf(contractAddress, CONTRACT_REGISTRATION_TOKENID) > 0;
-    }
-
-    function numberOfRegisteredAccounts() external view returns (uint256) {
-        return totalSupply(EOA_REGISTRATION_TOKENID);
-    }
-
-    function numberOfRegisteredContracts() external view returns (uint256) {
-        return totalSupply(CONTRACT_REGISTRATION_TOKENID);
+    function numberOfBaseRegistered() public view override returns (uint256) {
+        return totalSupply(BASE_REGISTRATION_TOKENID);
     }
 
     function safeTransferFrom(

@@ -34,10 +34,10 @@ contract MockContract is IERC1155ReceiverUpgradeable {
     function supportsInterface(bytes4 interfaceId) external view returns (bool) {}
 
     function transferVID(address to) external {
-        IERC1155Upgradeable(_violetId).safeTransferFrom(address(this), to, 1, 1, "");
+        IERC1155Upgradeable(_violetId).safeTransferFrom(address(this), to, 0, 1, "");
     }
 
     function transferVIDBatch(address to) external {
-        IERC1155Upgradeable(_violetId).safeBatchTransferFrom(address(this), to, new uint256[](1), new uint256[](1), "");
+        IERC1155Upgradeable(_violetId).safeBatchTransferFrom(address(this), to, new uint256[](0), new uint256[](1), "");
     }
 }
