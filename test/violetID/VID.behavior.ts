@@ -41,44 +41,46 @@ export function shouldBehaveLikeVioletID(): void {
     });
   });
 
-  describe("flag", async function () {
+  describe("verifyStatus", async function () {
     context("EOA target", async function () {
       it("as admin should succeed", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
-        ).to.not.be.reverted;
+            .verifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
+        )
+          .to.emit(this.violetID, "AccountVerified")
+          .withArgs(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID);
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(1);
       });
 
       it("twice should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(1);
 
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith("account already registered");
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(1);
       });
 
       it("as owner should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -88,7 +90,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -100,38 +102,40 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
-        ).to.not.be.reverted;
+            .verifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
+        )
+          .to.emit(this.violetID, "AccountVerified")
+          .withArgs(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID);
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(1);
       });
 
       it("twice should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(1);
 
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith("account already registered");
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(1);
       });
 
       it("as owner should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -141,7 +145,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -149,13 +153,13 @@ export function shouldBehaveLikeVioletID(): void {
     });
   });
 
-  describe("unflag", async function () {
+  describe("unverifyStatus", async function () {
     context("EOA target", async function () {
-      beforeEach("flag", async function () {
+      beforeEach("verifyStatus", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -163,76 +167,76 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.false;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(0);
       });
 
       it("as admin should emit event", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         )
-          .to.emit(this.violetID, "AccountDeregistered")
-          .withArgs(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00");
+          .to.emit(this.violetID, "AccountUnverified")
+          .withArgs(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00");
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.false;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(0);
       });
 
       it("as owner should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(1);
       });
 
       it("as user should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(1);
       });
 
       it("already unregistered account should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.false;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(0);
 
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .unflag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith("account not registered");
       });
     });
 
     context("Contract target", async function () {
-      beforeEach("flag", async function () {
+      beforeEach("verifyStatus", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -240,66 +244,66 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(0);
       });
 
       it("as admin should emit event", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         )
-          .to.emit(this.violetID, "AccountDeregistered")
-          .withArgs(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00");
+          .to.emit(this.violetID, "AccountUnverified")
+          .withArgs(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00");
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(0);
       });
 
       it("as owner should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(1);
       });
 
       it("as user should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(1);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(1);
       });
 
       it("already unregistered account should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.callStatic.numberOfBaseRegistered()).to.equal(0);
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.callStatic.numberWithBaseVerifiedStatus()).to.equal(0);
 
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .unflag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .unverifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith("account not registered");
       });
     });
@@ -307,11 +311,11 @@ export function shouldBehaveLikeVioletID(): void {
 
   describe("safeTransferFrom", async function () {
     context("EOA holder", async function () {
-      beforeEach("flag", async function () {
+      beforeEach("verifyStatus", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -322,14 +326,14 @@ export function shouldBehaveLikeVioletID(): void {
             .safeTransferFrom(
               this.signers.user.address,
               this.signers.admin.address,
-              this.BASE_REGISTRATION_TOKENID,
+              this.BASE_VERIFIED_STATUS_TOKENID,
               1,
               "0x00",
             ),
         ).to.be.revertedWith(`transfers disallowed`);
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.admin.address)).to.be.false;
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.signers.admin.address)).to.be.false;
       });
 
       it("to Contract should fail", async function () {
@@ -339,7 +343,7 @@ export function shouldBehaveLikeVioletID(): void {
             .safeTransferFrom(
               this.signers.user.address,
               this.mockContract.address,
-              this.BASE_REGISTRATION_TOKENID,
+              this.BASE_VERIFIED_STATUS_TOKENID,
               1,
               "0x00",
             ),
@@ -348,11 +352,11 @@ export function shouldBehaveLikeVioletID(): void {
     });
 
     context("Contract holder", async function () {
-      beforeEach("flag", async function () {
+      beforeEach("verifyStatus", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -366,19 +370,19 @@ export function shouldBehaveLikeVioletID(): void {
         const anotherMock = await (await ethers.getContractFactory("MockContract")).deploy(this.violetID.address);
         await expect(this.mockContract.transferVID(anotherMock.address)).to.be.revertedWith(`transfers disallowed`);
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
-        expect(await this.violetID.callStatic.isBaseRegistered(anotherMock.address)).to.be.false;
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(anotherMock.address)).to.be.false;
       });
     });
   });
 
   describe("safeBatchTransferFrom", async function () {
     context("EOA holder", async function () {
-      beforeEach("flag", async function () {
+      beforeEach("verifyStatus", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -389,7 +393,7 @@ export function shouldBehaveLikeVioletID(): void {
             .safeBatchTransferFrom(
               this.signers.user.address,
               this.signers.admin.address,
-              [this.BASE_REGISTRATION_TOKENID],
+              [this.BASE_VERIFIED_STATUS_TOKENID],
               [1],
               "0x00",
             ),
@@ -403,7 +407,7 @@ export function shouldBehaveLikeVioletID(): void {
             .safeBatchTransferFrom(
               this.signers.user.address,
               this.mockContract.address,
-              [this.BASE_REGISTRATION_TOKENID],
+              [this.BASE_VERIFIED_STATUS_TOKENID],
               [1],
               "0x00",
             ),
@@ -412,11 +416,11 @@ export function shouldBehaveLikeVioletID(): void {
     });
 
     context("Contract holder", async function () {
-      beforeEach("flag", async function () {
+      beforeEach("verifyStatus", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -432,37 +436,37 @@ export function shouldBehaveLikeVioletID(): void {
           `transfers disallowed`,
         );
 
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
-        expect(await this.violetID.callStatic.isBaseRegistered(anotherMock.address)).to.be.false;
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.callStatic.hasBaseVerifiedStatus(anotherMock.address)).to.be.false;
       });
     });
   });
 
-  describe("isRegistered", async function () {
+  describe("hasStatus", async function () {
     context("EOA holder", async function () {
       it("user should be registered", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(
           await this.violetID
             .connect(this.signers.user)
-            .isRegistered(this.signers.user.address, this.BASE_REGISTRATION_TOKENID),
+            .hasStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID),
         ).to.be.true;
       });
 
       it("user should not be registered", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.signers.user.address, 42, "0x00"),
+          this.violetID.connect(this.signers.admin).verifyStatus(this.signers.user.address, 42, "0x00"),
         ).to.not.be.reverted;
 
         expect(
           await this.violetID
             .connect(this.signers.user)
-            .isRegistered(this.signers.user.address, this.BASE_REGISTRATION_TOKENID),
+            .hasStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID),
         ).to.be.false;
       });
     });
@@ -472,50 +476,58 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(
           await this.violetID
             .connect(this.signers.user)
-            .isRegistered(this.mockContract.address, this.BASE_REGISTRATION_TOKENID),
+            .hasStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID),
         ).to.be.true;
       });
 
       it("contract should not be registered", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.mockContract.address, 42, "0x00"),
+          this.violetID.connect(this.signers.admin).verifyStatus(this.mockContract.address, 42, "0x00"),
         ).to.not.be.reverted;
 
         expect(
           await this.violetID
             .connect(this.signers.user)
-            .isRegistered(this.mockContract.address, this.BASE_REGISTRATION_TOKENID),
+            .hasStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID),
         ).to.be.false;
       });
     });
   });
 
-  describe("isBaseRegistered", async function () {
+  describe("hasBaseVerifiedStatus", async function () {
     context("EOA holder", async function () {
       it("user should be base registered", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.signers.user.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.admin.address)).to.be.false;
+        expect(
+          await this.violetID.connect(this.signers.user).hasBaseVerifiedStatus(this.signers.user.address),
+        ).to.be.true;
+        expect(
+          await this.violetID.connect(this.signers.user).hasBaseVerifiedStatus(this.signers.admin.address),
+        ).to.be.false;
       });
 
       it("user should not be base registered", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.signers.user.address, 42, "0x00"),
+          this.violetID.connect(this.signers.admin).verifyStatus(this.signers.user.address, 42, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.user.address)).to.be.false;
-        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.admin.address)).to.be.false;
+        expect(
+          await this.violetID.connect(this.signers.user).hasBaseVerifiedStatus(this.signers.user.address),
+        ).to.be.false;
+        expect(
+          await this.violetID.connect(this.signers.user).hasBaseVerifiedStatus(this.signers.admin.address),
+        ).to.be.false;
       });
     });
 
@@ -524,20 +536,28 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+            .verifyStatus(this.mockContract.address, this.BASE_VERIFIED_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.mockContract.address)).to.be.true;
-        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.admin.address)).to.be.false;
+        expect(
+          await this.violetID.connect(this.signers.user).hasBaseVerifiedStatus(this.mockContract.address),
+        ).to.be.true;
+        expect(
+          await this.violetID.connect(this.signers.user).hasBaseVerifiedStatus(this.signers.admin.address),
+        ).to.be.false;
       });
 
       it("contract should not be base registered", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).flag(this.mockContract.address, 42, "0x00"),
+          this.violetID.connect(this.signers.admin).verifyStatus(this.mockContract.address, 42, "0x00"),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.mockContract.address)).to.be.false;
-        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.admin.address)).to.be.false;
+        expect(
+          await this.violetID.connect(this.signers.user).hasBaseVerifiedStatus(this.mockContract.address),
+        ).to.be.false;
+        expect(
+          await this.violetID.connect(this.signers.user).hasBaseVerifiedStatus(this.signers.admin.address),
+        ).to.be.false;
       });
     });
   });

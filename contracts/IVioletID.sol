@@ -2,15 +2,16 @@
 pragma solidity ^0.8.13;
 
 interface IVioletID {
-    event AccountDeregistered(address account, uint256 tokenId, bytes reason);
+    event AccountVerified(address account, uint256 tokenId);
+    event AccountUnverified(address account, uint256 tokenId, bytes reason);
 
-    function flag(address account, uint256 tokenId, bytes memory data) external;
+    function verifyStatus(address account, uint256 tokenId, bytes memory data) external;
 
-    function unflag(address account, uint256 tokenId, bytes memory reason) external;
+    function unverifyStatus(address account, uint256 tokenId, bytes memory reason) external;
 
-    function isRegistered(address account, uint256 tokenId) external view returns (bool);
+    function hasStatus(address account, uint256 tokenId) external view returns (bool);
 
-    function isBaseRegistered(address account) external view returns (bool);
+    function hasBaseVerifiedStatus(address account) external view returns (bool);
 
-    function numberOfBaseRegistered() external view returns (uint256);
+    function numberWithBaseVerifiedStatus() external view returns (uint256);
 }
