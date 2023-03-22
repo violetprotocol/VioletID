@@ -1,9 +1,7 @@
 import { expect } from "chai";
-import { BigNumber, utils } from "ethers";
+import { utils } from "ethers";
 import { toUtf8Bytes } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { MockContract__factory } from "../../src/types";
 
 const OWNER_ROLE = utils.keccak256(toUtf8Bytes("OWNER_ROLE"));
 const ADMIN_ROLE = utils.keccak256(toUtf8Bytes("ADMIN_ROLE"));
@@ -272,9 +270,6 @@ export function shouldBehaveLikeVioletID(): void {
               "0x00",
             ),
         ).to.be.revertedWith(`transfers disallowed`);
-
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.false;
       });
     });
 
@@ -291,9 +286,6 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(this.mockContract.transferVID(this.signers.user.address)).to.be.revertedWith(
           `transfers disallowed`,
         );
-
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.false;
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
       });
 
       it("to Contract should fail", async function () {
@@ -328,9 +320,6 @@ export function shouldBehaveLikeVioletID(): void {
               "0x00",
             ),
         ).to.be.revertedWith(`transfers disallowed`);
-
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.admin.address)).to.be.false;
       });
 
       it("to Contract should fail", async function () {
@@ -345,9 +334,6 @@ export function shouldBehaveLikeVioletID(): void {
               "0x00",
             ),
         ).to.be.revertedWith(`transfers disallowed`);
-
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.true;
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.false;
       });
     });
 
@@ -364,9 +350,6 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(this.mockContract.transferVIDBatch(this.signers.user.address)).to.be.revertedWith(
           `transfers disallowed`,
         );
-
-        expect(await this.violetID.callStatic.isBaseRegistered(this.signers.user.address)).to.be.false;
-        expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
       });
 
       it("to Contract should fail", async function () {
@@ -377,6 +360,51 @@ export function shouldBehaveLikeVioletID(): void {
 
         expect(await this.violetID.callStatic.isBaseRegistered(this.mockContract.address)).to.be.true;
         expect(await this.violetID.callStatic.isBaseRegistered(anotherMock.address)).to.be.false;
+      });
+    });
+  });
+  describe("isBaseRegistered", async function () {
+    context("EOA holder", async function () {
+      it("user should be base registered", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.signers.user.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.user.address)).to.be.true;
+        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.admin.address)).to.be.false;
+      });
+
+      it("user should not be base registered", async function () {
+        await expect(
+          this.violetID.connect(this.signers.admin).flag(this.signers.user.address, 42, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.user.address)).to.be.false;
+        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.admin.address)).to.be.false;
+      });
+    });
+
+    context("Contract holder", async function () {
+      it("contract should be base registered", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .flag(this.mockContract.address, this.BASE_REGISTRATION_TOKENID, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.mockContract.address)).to.be.true;
+        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.admin.address)).to.be.false;
+      });
+
+      it("contract should not be base registered", async function () {
+        await expect(
+          this.violetID.connect(this.signers.admin).flag(this.mockContract.address, 42, "0x00"),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.mockContract.address)).to.be.false;
+        expect(await this.violetID.connect(this.signers.user).isBaseRegistered(this.signers.admin.address)).to.be.false;
       });
     });
   });

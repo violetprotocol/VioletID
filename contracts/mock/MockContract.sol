@@ -31,6 +31,7 @@ contract MockContract is IERC1155ReceiverUpgradeable {
         return IERC1155ReceiverUpgradeable.onERC1155BatchReceived.selector;
     }
 
+    // solhint-disable-next-line no-empty-blocks
     function supportsInterface(bytes4 interfaceId) external view returns (bool) {}
 
     function transferVID(address to) external {
