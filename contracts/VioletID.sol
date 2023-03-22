@@ -32,7 +32,7 @@ contract VioletID is
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /// Public flag representing an address which enrolled with Violet
-    uint256 public constant BASE_REGISTRATION_STATUS_TOKENID = 0;
+    uint256 public constant VIOLET_VERIFICATION_STATUS_TOKENID = 0;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -86,12 +86,12 @@ contract VioletID is
         return balanceOf(account, tokenId) > 0;
     }
 
-    function hasBaseRegistrationStatus(address account) public view override returns (bool) {
-        return balanceOf(account, BASE_REGISTRATION_STATUS_TOKENID) > 0;
+    function hasVioletVerificationStatus(address account) public view override returns (bool) {
+        return balanceOf(account, VIOLET_VERIFICATION_STATUS_TOKENID) > 0;
     }
 
-    function numberWithBaseRegistrationStatus() public view override returns (uint256) {
-        return totalSupply(BASE_REGISTRATION_STATUS_TOKENID);
+    function numberWithVioletVerificationStatus() public view override returns (uint256) {
+        return totalSupply(VIOLET_VERIFICATION_STATUS_TOKENID);
     }
 
     function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {

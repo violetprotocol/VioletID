@@ -11,7 +11,7 @@ interface IVioletID {
 
     function hasStatus(address account, uint256 tokenId) external view returns (bool);
 
-    function hasBaseRegistrationStatus(address account) external view returns (bool);
+    function hasVioletVerificationStatus(address account) external view returns (bool);
 
-    function numberWithBaseRegistrationStatus() external view returns (uint256);
+    function numberWithVioletVerificationStatus() external view returns (uint256);
 }
