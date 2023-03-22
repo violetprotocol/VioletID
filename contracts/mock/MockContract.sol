@@ -12,21 +12,21 @@ contract MockContract is IERC1155ReceiverUpgradeable {
     }
 
     function onERC1155Received(
-        address operator,
-        address from,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes calldata
     ) external virtual override returns (bytes4) {
         return IERC1155ReceiverUpgradeable.onERC1155Received.selector;
     }
 
     function onERC1155BatchReceived(
-        address operator,
-        address from,
-        uint256[] calldata ids,
-        uint256[] calldata values,
-        bytes calldata data
+        address,
+        address,
+        uint256[] calldata,
+        uint256[] calldata,
+        bytes calldata
     ) external virtual override returns (bytes4) {
         return IERC1155ReceiverUpgradeable.onERC1155BatchReceived.selector;
     }

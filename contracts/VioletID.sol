@@ -85,13 +85,7 @@ contract VioletID is
         return totalSupply(BASE_REGISTRATION_TOKENID);
     }
 
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) public virtual override {
+    function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
         revert("transfers disallowed");
     }
 
@@ -99,11 +93,11 @@ contract VioletID is
      * @dev See {IERC1155-safeBatchTransferFrom}.
      */
     function safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        address,
+        address,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
     ) public virtual override {
         revert("transfers disallowed");
     }
