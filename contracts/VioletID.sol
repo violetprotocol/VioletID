@@ -32,7 +32,7 @@ contract VioletID is
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /// Public flag representing an address which enrolled with Violet
-    uint256 public constant BASE_VERIFIED_STATUS_TOKENID = 0;
+    uint256 public constant BASE_REGISTRATION_STATUS_TOKENID = 0;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -68,34 +68,30 @@ contract VioletID is
         _unpause();
     }
 
-    function verifyStatus(address account, uint256 tokenId, bytes memory data) public override onlyRole(ADMIN_ROLE) {
-        require(!hasStatus(account, tokenId), "account already registered");
+    function grantStatus(address account, uint256 tokenId, bytes memory data) public override onlyRole(ADMIN_ROLE) {
+        require(!hasStatus(account, tokenId), "account already granted status");
 
         _mint(account, tokenId, 1, data);
-        emit AccountVerified(account, tokenId);
+        emit GrantedStatus(account, tokenId);
     }
 
-    function unverifyStatus(
-        address account,
-        uint256 tokenId,
-        bytes memory reason
-    ) public override onlyRole(ADMIN_ROLE) {
-        require(hasStatus(account, tokenId), "account not registered");
+    function revokeStatus(address account, uint256 tokenId, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
+        require(hasStatus(account, tokenId), "account not in revocable status");
 
         _burn(account, tokenId, 1);
-        emit AccountUnverified(account, tokenId, reason);
+        emit RevokedStatus(account, tokenId, reason);
     }
 
     function hasStatus(address account, uint256 tokenId) public view override returns (bool) {
         return balanceOf(account, tokenId) > 0;
     }
 
-    function hasBaseVerifiedStatus(address account) public view override returns (bool) {
-        return balanceOf(account, BASE_VERIFIED_STATUS_TOKENID) > 0;
+    function hasBaseRegistrationStatus(address account) public view override returns (bool) {
+        return balanceOf(account, BASE_REGISTRATION_STATUS_TOKENID) > 0;
     }
 
-    function numberWithBaseVerifiedStatus() public view override returns (uint256) {
-        return totalSupply(BASE_VERIFIED_STATUS_TOKENID);
+    function numberWithBaseRegistrationStatus() public view override returns (uint256) {
+        return totalSupply(BASE_REGISTRATION_STATUS_TOKENID);
     }
 
     function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
