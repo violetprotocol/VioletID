@@ -31,7 +31,7 @@ contract VioletID is
     ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    /// Public flag representing an address which enrolled with Violet
+    /// Public flag representing an address which has passed Violet Verification
     uint256 public constant VIOLET_VERIFICATION_STATUS_TOKENID = 0;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
