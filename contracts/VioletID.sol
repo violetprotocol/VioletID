@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155Burn
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "./IVioletID.sol";
 
 contract VioletID is
     Initializable,
@@ -16,7 +17,8 @@ contract VioletID is
     PausableUpgradeable,
     ERC1155BurnableUpgradeable,
     ERC1155SupplyUpgradeable,
-    UUPSUpgradeable
+    UUPSUpgradeable,
+    IVioletID
 {
     /// @notice Owner role for:
     ///     - Upgrading
@@ -28,6 +30,9 @@ contract VioletID is
     ///     - Minting
     ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
+    /// Public flag representing an address which has passed Violet Verification
+    uint256 public constant VIOLET_VERIFICATION_STATUS_TOKENID = 0;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -63,17 +68,47 @@ contract VioletID is
         _unpause();
     }
 
-    function mint(address account, uint256 id, uint256 amount, bytes memory data) public onlyRole(ADMIN_ROLE) {
-        _mint(account, id, amount, data);
+    function grantStatus(address account, uint256 tokenId, bytes memory data) public override onlyRole(ADMIN_ROLE) {
+        require(!hasStatus(account, tokenId), "account already granted status");
+
+        _mint(account, tokenId, 1, data);
+        emit GrantedStatus(account, tokenId);
     }
 
-    function mintBatch(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) public onlyRole(ADMIN_ROLE) {
-        _mintBatch(to, ids, amounts, data);
+    function revokeStatus(address account, uint256 tokenId, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
+        require(hasStatus(account, tokenId), "account not in revocable status");
+
+        _burn(account, tokenId, 1);
+        emit RevokedStatus(account, tokenId, reason);
+    }
+
+    function hasStatus(address account, uint256 tokenId) public view override returns (bool) {
+        return balanceOf(account, tokenId) > 0;
+    }
+
+    function hasVioletVerificationStatus(address account) public view override returns (bool) {
+        return balanceOf(account, VIOLET_VERIFICATION_STATUS_TOKENID) > 0;
+    }
+
+    function numberWithVioletVerificationStatus() public view override returns (uint256) {
+        return totalSupply(VIOLET_VERIFICATION_STATUS_TOKENID);
+    }
+
+    function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
+        revert("transfers disallowed");
+    }
+
+    /**
+     * @dev See {IERC1155-safeBatchTransferFrom}.
+     */
+    function safeBatchTransferFrom(
+        address,
+        address,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
+    ) public virtual override {
+        revert("transfers disallowed");
     }
 
     function _beforeTokenTransfer(
