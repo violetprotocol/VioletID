@@ -1,7 +1,7 @@
 {
   "name": "@violetprotocol/violetid",
   "description": "",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "violetprotocol",
     "url": "https://github.com/violetprotocol"
@@ -77,7 +77,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "shx rm -rf ./artifacts ./cache ./coverage ./types ./coverage.json && yarn typechain",
+    "clean": "shx rm -rf ./artifacts ./cache ./coverage ./types ./coverage.json",
     "commit": "git-cz",
     "compile": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat compile",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"test/**/*.ts\" && yarn typechain",
