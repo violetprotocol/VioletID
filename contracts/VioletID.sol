@@ -31,8 +31,8 @@ contract VioletID is
     ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    /// Public flag representing an address which has passed Violet Verification for Mauve
-    uint256 public constant MAUVE_VERIFICATION_STATUS_TOKENID = 0;
+    /// Public flag representing a verified entity status which has passed Violet Verification for Mauve
+    uint256 public constant MAUVE_VERIFIED_ENTITY_STATUS_TOKENID = 0;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -87,11 +87,11 @@ contract VioletID is
     }
 
     function hasMauveVerificationStatus(address account) public view override returns (bool) {
-        return balanceOf(account, MAUVE_VERIFICATION_STATUS_TOKENID) > 0;
+        return balanceOf(account, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID) > 0;
     }
 
     function numberWithMauveVerificationStatus() public view override returns (uint256) {
-        return totalSupply(MAUVE_VERIFICATION_STATUS_TOKENID);
+        return totalSupply(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
     }
 
     function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
