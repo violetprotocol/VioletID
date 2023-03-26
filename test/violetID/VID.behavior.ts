@@ -47,10 +47,10 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         )
           .to.emit(this.violetID, "GrantedStatus")
-          .withArgs(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID);
+          .withArgs(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
 
         expect(await this.violetID.hasMauveVerificationStatus(this.signers.user.address)).to.be.true;
         expect(await this.violetID.numberWithMauveVerificationStatus()).to.equal(1);
@@ -60,7 +60,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(await this.violetID.hasMauveVerificationStatus(this.signers.user.address)).to.be.true;
@@ -69,7 +69,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith("account already granted status");
 
         expect(await this.violetID.hasMauveVerificationStatus(this.signers.user.address)).to.be.true;
@@ -80,7 +80,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .grantStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -90,7 +90,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .grantStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -102,10 +102,10 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         )
           .to.emit(this.violetID, "GrantedStatus")
-          .withArgs(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID);
+          .withArgs(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
 
         expect(await this.violetID.hasMauveVerificationStatus(this.mockContract.address)).to.be.true;
         expect(await this.violetID.numberWithMauveVerificationStatus()).to.equal(1);
@@ -115,7 +115,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(await this.violetID.hasMauveVerificationStatus(this.mockContract.address)).to.be.true;
@@ -124,7 +124,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith("account already granted status");
 
         expect(await this.violetID.hasMauveVerificationStatus(this.mockContract.address)).to.be.true;
@@ -135,7 +135,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .grantStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -145,7 +145,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .grantStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -159,7 +159,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -167,7 +167,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(await this.violetID.hasMauveVerificationStatus(this.signers.user.address)).to.be.false;
@@ -178,10 +178,10 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         )
           .to.emit(this.violetID, "RevokedStatus")
-          .withArgs(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00");
+          .withArgs(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00");
 
         expect(await this.violetID.hasMauveVerificationStatus(this.signers.user.address)).to.be.false;
         expect(await this.violetID.numberWithMauveVerificationStatus()).to.equal(0);
@@ -191,7 +191,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -204,7 +204,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -217,7 +217,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(await this.violetID.hasMauveVerificationStatus(this.signers.user.address)).to.be.false;
@@ -226,7 +226,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith("account not in revocable status");
       });
     });
@@ -236,7 +236,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -244,7 +244,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(await this.violetID.hasMauveVerificationStatus(this.mockContract.address)).to.be.false;
@@ -255,10 +255,10 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         )
           .to.emit(this.violetID, "RevokedStatus")
-          .withArgs(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00");
+          .withArgs(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00");
 
         expect(await this.violetID.hasMauveVerificationStatus(this.mockContract.address)).to.be.false;
         expect(await this.violetID.numberWithMauveVerificationStatus()).to.equal(0);
@@ -268,7 +268,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -281,7 +281,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -294,7 +294,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(await this.violetID.hasMauveVerificationStatus(this.mockContract.address)).to.be.false;
@@ -303,7 +303,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .revokeStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.be.revertedWith("account not in revocable status");
       });
     });
@@ -315,7 +315,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -326,7 +326,7 @@ export function shouldBehaveLikeVioletID(): void {
             .safeTransferFrom(
               this.signers.user.address,
               this.signers.admin.address,
-              this.MAUVE_VERIFICATION_STATUS_TOKENID,
+              this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID,
               1,
               "0x00",
             ),
@@ -343,7 +343,7 @@ export function shouldBehaveLikeVioletID(): void {
             .safeTransferFrom(
               this.signers.user.address,
               this.mockContract.address,
-              this.MAUVE_VERIFICATION_STATUS_TOKENID,
+              this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID,
               1,
               "0x00",
             ),
@@ -356,7 +356,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -382,7 +382,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -393,7 +393,7 @@ export function shouldBehaveLikeVioletID(): void {
             .safeBatchTransferFrom(
               this.signers.user.address,
               this.signers.admin.address,
-              [this.MAUVE_VERIFICATION_STATUS_TOKENID],
+              [this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID],
               [1],
               "0x00",
             ),
@@ -407,7 +407,7 @@ export function shouldBehaveLikeVioletID(): void {
             .safeBatchTransferFrom(
               this.signers.user.address,
               this.mockContract.address,
-              [this.MAUVE_VERIFICATION_STATUS_TOKENID],
+              [this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID],
               [1],
               "0x00",
             ),
@@ -420,7 +420,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
       });
 
@@ -448,13 +448,13 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(
           await this.violetID
             .connect(this.signers.user)
-            .hasStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID),
+            .hasStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
         ).to.be.true;
       });
 
@@ -466,7 +466,7 @@ export function shouldBehaveLikeVioletID(): void {
         expect(
           await this.violetID
             .connect(this.signers.user)
-            .hasStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID),
+            .hasStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
         ).to.be.false;
       });
     });
@@ -476,13 +476,13 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(
           await this.violetID
             .connect(this.signers.user)
-            .hasStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID),
+            .hasStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
         ).to.be.true;
       });
 
@@ -494,7 +494,7 @@ export function shouldBehaveLikeVioletID(): void {
         expect(
           await this.violetID
             .connect(this.signers.user)
-            .hasStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID),
+            .hasStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
         ).to.be.false;
       });
     });
@@ -506,7 +506,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.signers.user.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.signers.user.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(
@@ -536,7 +536,7 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.mockContract.address, this.MAUVE_VERIFICATION_STATUS_TOKENID, "0x00"),
+            .grantStatus(this.mockContract.address, this.MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
         ).to.not.be.reverted;
 
         expect(
