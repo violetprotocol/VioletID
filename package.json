@@ -1,7 +1,7 @@
 {
   "name": "@violetprotocol/violetid",
   "description": "",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "violetprotocol",
     "url": "https://github.com/violetprotocol"
@@ -59,7 +59,8 @@
   "files": [
     "contracts",
     "!contracts/mock/**/*",
-    "artifacts/contracts/**/*.json"
+    "artifacts/contracts/**/*.json",
+    "!artifacts/contracts/**/*.json"
   ],
   "keywords": [
     "blockchain",
