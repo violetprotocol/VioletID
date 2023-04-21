@@ -9,7 +9,7 @@ export async function deployVioletIDFixture(): Promise<{ violetID: VioletID; moc
   const admin: SignerWithAddress = signers[1];
 
   const VioletIDFactory: VioletID__factory = <VioletID__factory>await ethers.getContractFactory("VioletID");
-  const violetID: VioletID = <VioletID>await upgrades.deployProxy(VioletIDFactory, [], {});
+  const violetID: VioletID = <VioletID>await upgrades.deployProxy(VioletIDFactory, [], { initializer: "initialize" });
   await violetID.deployed();
 
   await violetID.connect(owner).grantRole(await violetID.callStatic.ADMIN_ROLE(), admin.address);
