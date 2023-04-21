@@ -36,7 +36,6 @@ contract VioletID is
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
-        initialize();
         _disableInitializers();
     }
 
