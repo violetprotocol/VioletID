@@ -86,7 +86,11 @@ contract VioletID is
         emit TokenUpdated(tokenId, tokenName);
     }
 
-    function grantStatus(address account, uint256 tokenId, bytes memory data) public override onlyRole(ADMIN_ROLE) {
+    function grantStatus(
+        address account,
+        uint256 tokenId,
+        bytes memory data
+    ) public override onlyRole(ADMIN_ROLE) onlyRegisteredTokens(tokenId) {
         require(!hasStatus(account, tokenId), "account already granted status");
 
         _mint(account, tokenId, 1, data);
