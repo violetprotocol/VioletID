@@ -51,7 +51,7 @@ export function shouldBehaveLikeVioletID(): void {
           .connect(this.signers.admin)
           .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
       )
-        .to.emit(this.violetID, "TokenRegistered")
+        .to.emit(this.violetID, "TokenTypeRegistered")
         .withArgs(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME);
 
       expect(await this.violetID.callStatic.tokenIdToType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(
@@ -115,7 +115,7 @@ export function shouldBehaveLikeVioletID(): void {
             .connect(this.signers.admin)
             .updateTokenTypeName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, newTokenTypeName),
         )
-          .to.emit(this.violetID, "TokenUpdated")
+          .to.emit(this.violetID, "TokenTypeUpdated")
           .withArgs(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, newTokenTypeName);
 
         expect(await this.violetID.callStatic.tokenIdToType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(

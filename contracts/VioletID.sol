@@ -75,7 +75,7 @@ contract VioletID is
         require(bytes(tokenIdToType[tokenId]).length == 0, "token type already exists");
 
         tokenIdToType[tokenId] = tokenName;
-        emit TokenRegistered(tokenId, tokenName);
+        emit TokenTypeRegistered(tokenId, tokenName);
     }
 
     function updateTokenTypeName(
@@ -83,7 +83,7 @@ contract VioletID is
         string calldata tokenName
     ) public override onlyRole(ADMIN_ROLE) onlyRegisteredTokens(tokenId) {
         tokenIdToType[tokenId] = tokenName;
-        emit TokenUpdated(tokenId, tokenName);
+        emit TokenTypeUpdated(tokenId, tokenName);
     }
 
     function grantStatus(

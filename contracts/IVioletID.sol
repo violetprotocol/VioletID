@@ -2,8 +2,8 @@
 pragma solidity ^0.8.13;
 
 interface IVioletID {
-    event TokenRegistered(uint256 tokenId, string tokenName);
-    event TokenUpdated(uint256 tokenId, string tokenName);
+    event TokenTypeRegistered(uint256 tokenId, string tokenName);
+    event TokenTypeUpdated(uint256 tokenId, string tokenName);
     event GrantedStatus(address account, uint256 tokenId);
     event RevokedStatus(address account, uint256 tokenId, bytes reason);
 
