@@ -31,8 +31,12 @@ contract VioletID is
     ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    /// Public flag representing a verified entity status which has passed Violet Verification for Mauve
-    uint256 public constant MAUVE_VERIFIED_ENTITY_STATUS_TOKENID = 0;
+    mapping(uint256 => string) public override tokenIdToType;
+
+    modifier onlyRegisteredTokens(uint256 tokenId) {
+        require(bytes(tokenIdToType[tokenId]).length > 0, "token type not registered");
+        _;
+    }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -67,6 +71,21 @@ contract VioletID is
         _unpause();
     }
 
+    function registerTokenType(uint256 tokenId, string calldata tokenName) public override onlyRole(ADMIN_ROLE) {
+        require(bytes(tokenIdToType[tokenId]).length == 0, "token type already exists");
+
+        tokenIdToType[tokenId] = tokenName;
+        emit TokenRegistered(tokenId, tokenName);
+    }
+
+    function updateTokenTypeName(
+        uint256 tokenId,
+        string calldata tokenName
+    ) public override onlyRole(ADMIN_ROLE) onlyRegisteredTokens(tokenId) {
+        tokenIdToType[tokenId] = tokenName;
+        emit TokenUpdated(tokenId, tokenName);
+    }
+
     function grantStatus(address account, uint256 tokenId, bytes memory data) public override onlyRole(ADMIN_ROLE) {
         require(!hasStatus(account, tokenId), "account already granted status");
 
@@ -83,14 +102,6 @@ contract VioletID is
 
     function hasStatus(address account, uint256 tokenId) public view override returns (bool) {
         return balanceOf(account, tokenId) > 0;
-    }
-
-    function hasMauveVerificationStatus(address account) public view override returns (bool) {
-        return balanceOf(account, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID) > 0;
-    }
-
-    function numberWithMauveVerificationStatus() public view override returns (uint256) {
-        return totalSupply(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
     }
 
     function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
