@@ -2,6 +2,8 @@
 pragma solidity ^0.8.13;
 
 interface IVioletID {
+    event TokenTypeRegistered(uint256 tokenId, string tokenName);
+    event TokenTypeUpdated(uint256 tokenId, string tokenName);
     event GrantedStatus(address account, uint256 tokenId);
     event RevokedStatus(address account, uint256 tokenId, bytes reason);
 
@@ -11,7 +13,9 @@ interface IVioletID {
 
     function hasStatus(address account, uint256 tokenId) external view returns (bool);
 
-    function hasMauveVerificationStatus(address account) external view returns (bool);
+    function tokenIdToName(uint256 tokenId) external view returns (string memory);
 
-    function numberWithMauveVerificationStatus() external view returns (uint256);
+    function registerTokenType(uint256 tokenId, string calldata tokenName) external;
+
+    function updateTokenTypeName(uint256 tokenId, string calldata tokenName) external;
 }
