@@ -54,7 +54,7 @@ export function shouldBehaveLikeVioletID(): void {
         .to.emit(this.violetID, "TokenTypeRegistered")
         .withArgs(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME);
 
-      expect(await this.violetID.callStatic.tokenIdToType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(
+      expect(await this.violetID.callStatic.tokenIdToName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(
         MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME,
       );
     });
@@ -68,7 +68,7 @@ export function shouldBehaveLikeVioletID(): void {
         `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role 0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775`,
       );
 
-      expect(await this.violetID.callStatic.tokenIdToType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal("");
+      expect(await this.violetID.callStatic.tokenIdToName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal("");
     });
 
     context("with registered token", async function () {
@@ -118,7 +118,7 @@ export function shouldBehaveLikeVioletID(): void {
           .to.emit(this.violetID, "TokenTypeUpdated")
           .withArgs(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, newTokenTypeName);
 
-        expect(await this.violetID.callStatic.tokenIdToType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(
+        expect(await this.violetID.callStatic.tokenIdToName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(
           newTokenTypeName,
         );
       });
@@ -132,7 +132,7 @@ export function shouldBehaveLikeVioletID(): void {
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role 0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775`,
         );
 
-        expect(await this.violetID.callStatic.tokenIdToType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(
+        expect(await this.violetID.callStatic.tokenIdToName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(
           MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME,
         );
       });

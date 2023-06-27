@@ -31,10 +31,10 @@ contract VioletID is
     ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    mapping(uint256 => string) public override tokenIdToType;
+    mapping(uint256 => string) public override tokenIdToName;
 
     modifier onlyRegisteredTokens(uint256 tokenId) {
-        require(bytes(tokenIdToType[tokenId]).length > 0, "token type not registered");
+        require(bytes(tokenIdToName[tokenId]).length > 0, "token type not registered");
         _;
     }
 
@@ -72,9 +72,9 @@ contract VioletID is
     }
 
     function registerTokenType(uint256 tokenId, string calldata tokenName) public override onlyRole(ADMIN_ROLE) {
-        require(bytes(tokenIdToType[tokenId]).length == 0, "token type already exists");
+        require(bytes(tokenIdToName[tokenId]).length == 0, "token type already exists");
 
-        tokenIdToType[tokenId] = tokenName;
+        tokenIdToName[tokenId] = tokenName;
         emit TokenTypeRegistered(tokenId, tokenName);
     }
 
@@ -82,7 +82,7 @@ contract VioletID is
         uint256 tokenId,
         string calldata tokenName
     ) public override onlyRole(ADMIN_ROLE) onlyRegisteredTokens(tokenId) {
-        tokenIdToType[tokenId] = tokenName;
+        tokenIdToName[tokenId] = tokenName;
         emit TokenTypeUpdated(tokenId, tokenName);
     }
 

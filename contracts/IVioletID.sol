@@ -13,7 +13,7 @@ interface IVioletID {
 
     function hasStatus(address account, uint256 tokenId) external view returns (bool);
 
-    function tokenIdToType(uint256 tokenId) external view returns (string memory);
+    function tokenIdToName(uint256 tokenId) external view returns (string memory);
 
     function registerTokenType(uint256 tokenId, string calldata tokenName) external;
 
