@@ -47,10 +47,10 @@ const chainIds = {
 // If a private key is defined, it will use it and nothing else.
 // Otherwise, it will use the mnemonic set in env.
 const getAccounts = () => {
-  if (process.env?.LEDGER_ACCOUNT_ADDRESS) {
+  if (ledgerAddress) {
     return {
       accounts: undefined,
-      ledgerAccounts: [process.env?.LEDGER_ACCOUNT_ADDRESS],
+      ledgerAccounts: [ledgerAddress],
     };
   } else if (privateKey) {
     return {
