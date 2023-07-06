@@ -1,4 +1,3 @@
-import { keccak256 } from "ethers/lib/utils";
 import { task } from "hardhat/config";
 import type { TaskArguments } from "hardhat/types";
 
