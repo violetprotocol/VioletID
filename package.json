@@ -30,6 +30,8 @@
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^5.44.0",
     "@typescript-eslint/parser": "^5.44.0",
+    "@violetprotocol/ethereum-access-token": "0.3.0",
+    "@violetprotocol/ethereum-access-token-helpers": "^0.2.0",
     "chai": "^4.3.7",
     "commitizen": "^4.2.5",
     "cross-env": "^7.0.3",
@@ -96,6 +98,7 @@
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
   },
   "dependencies": {
-    "@openzeppelin/contracts-upgradeable": "^4.8.1"
+    "@openzeppelin/contracts-upgradeable": "^4.8.1",
+    "hardhat-dependency-compiler": "^1.1.3"
   }
 }

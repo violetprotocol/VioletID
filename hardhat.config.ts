@@ -3,6 +3,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-etherscan";
 import "@openzeppelin/hardhat-upgrades";
 import { config as dotenvConfig } from "dotenv";
+import "hardhat-dependency-compiler";
 import "hardhat-gas-reporter";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
@@ -141,9 +142,12 @@ const config: HardhatUserConfig = {
       // https://hardhat.org/hardhat-network/#solidity-optimizer-support
       optimizer: {
         enabled: true,
-        runs: 800,
+        runs: 20000,
       },
     },
+  },
+  dependencyCompiler: {
+    paths: ["@violetprotocol/ethereum-access-token/contracts/AccessTokenVerifier.sol"],
   },
   typechain: {
     outDir: "src/types",
