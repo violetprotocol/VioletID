@@ -3,6 +3,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-etherscan";
 import "@openzeppelin/hardhat-upgrades";
 import { config as dotenvConfig } from "dotenv";
+import * as ethers from "ethers";
 import "hardhat-gas-reporter";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
@@ -116,7 +117,10 @@ const config: HardhatUserConfig = {
     bsc: getChainConfig("bsc"),
     mainnet: getChainConfig("mainnet"),
     optimism: getChainConfig("optimism-mainnet"),
-    optimismGoerli: getChainConfig("optimism-goerli"),
+    optimismGoerli: {
+      ...getChainConfig("optimism-goerli"),
+      gasPrice: ethers.utils.parseUnits("2", "gwei").toNumber(),
+    },
     polygon: getChainConfig("polygon-mainnet"),
     polygonMumbai: getChainConfig("polygon-mumbai"),
     rinkeby: getChainConfig("rinkeby"),
