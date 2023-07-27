@@ -12,7 +12,7 @@ task("deploy:VioletID").setAction(async function (_taskArguments: TaskArguments,
 
   const VioletIDFactory: VioletID__factory = <VioletID__factory>await ethers.getContractFactory("VioletID");
   const violetID: VioletID = <VioletID>await upgrades.deployProxy(VioletIDFactory, [], { initializer: "initialize" });
-  await violetID.deployed();
+  await violetID.deployTransaction.wait(5);
   console.log(`🚀 VioletID deployed at: ${violetID.address}`);
 
   console.log("Verifying contract...");
