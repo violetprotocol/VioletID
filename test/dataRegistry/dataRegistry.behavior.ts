@@ -13,19 +13,25 @@ const MOCK_TOKEN_ID = 1;
 export function shouldBehaveLikeDataRegistry(): void {
   describe("grantStatusSingle", async function () {
     context("With RBAC", async function () {
+      // Gas used: ~45930
       it("as owner should succeed", async function () {
         await this.dataRegistry
           .connect(this.signers.owner)
-          ["grantStatusSingle(uint256,uint256)"](US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID);
+          ["grantStatusSingle(uint256,uint256)"](ENROLLED_BUSINESS_STATUS_ID, MOCK_TOKEN_ID);
 
-        expect(await this.dataRegistry.hasStatus(US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
+        expect(await this.dataRegistry.hasStatus(ENROLLED_BUSINESS_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
       });
 
-      it("should grant another status", async function () {
+      it("granting another status should work", async function () {
+        await this.dataRegistry
+          .connect(this.signers.owner)
+          ["grantStatusSingle(uint256,uint256)"](ENROLLED_INDIVIDUAL_STATUS_ID, MOCK_TOKEN_ID);
+
         await this.dataRegistry
           .connect(this.signers.owner)
           ["grantStatusSingle(uint256,uint256)"](NON_US_PERSON_STATUS_ID, MOCK_TOKEN_ID);
 
+        expect(await this.dataRegistry.hasStatus(ENROLLED_INDIVIDUAL_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
         expect(await this.dataRegistry.hasStatus(NON_US_PERSON_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
       });
 
@@ -37,15 +43,18 @@ export function shouldBehaveLikeDataRegistry(): void {
         ).to.be.revertedWithCustomError(this.dataRegistry, "Unauthorized");
       });
 
+      // Test to figure out how much gas is used when granting a status to a tokenId which already has another status
+      // Gas used: ~28830
       it("gas test", async function () {
         await this.dataRegistry
           .connect(this.signers.owner)
-          .grantStatusBatch(US_ACCREDITED_INVESTOR_STATUS_ID, this.tokenIds);
+          .grantStatusBatch(ENROLLED_INDIVIDUAL_STATUS_ID, this.tokenIds);
 
         for (const _iterator of this.tokenIds) {
+          // Grants the NON_US_PERSON_STATUS_ID status to a random tokenId (if it doesn't have it already)
           const randomTokenId = this.tokenIds[Math.floor(Math.random() * this.tokenIds.length)];
           const hasStatus = await this.dataRegistry.hasStatus(NON_US_PERSON_STATUS_ID, randomTokenId);
-          console.log("hasStatus", hasStatus);
+
           if (!hasStatus) {
             await this.dataRegistry
               .connect(this.signers.owner)
@@ -86,7 +95,8 @@ export function shouldBehaveLikeDataRegistry(): void {
   describe("grantMultipleStatusesSingle", async function () {
     context("With RBAC", async function () {
       const statusesToGive = [ENROLLED_INDIVIDUAL_STATUS_ID, US_ACCREDITED_INVESTOR_STATUS_ID, US_PERSON_STATUS_ID];
-
+      // Get the mask needed, combining the different status indices (2, 4 & 6):
+      // 1010100 = 84
       const INDIVIDUAL_US_PERSON_ACCREDITED_ID = statusesToGive.reduce((acc, statusIndex) => {
         return acc | (1 << statusIndex);
       }, 0);
