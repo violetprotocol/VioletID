@@ -9,6 +9,7 @@ import { SimpleRegistry } from "../../src/types";
 export const generateAccessTokenGrantSingle = async (
   signer: SignerWithAddress,
   verifyingContract: Contract,
+  functionSignature: string,
   caller: Wallet | SignerWithAddress,
   contract: SimpleRegistry,
   parameters: any[],
@@ -16,16 +17,10 @@ export const generateAccessTokenGrantSingle = async (
 ) => {
   const token = {
     functionCall: {
-      functionSignature: contract.interface.getSighash(
-        "grantStatusSingle(uint8,bytes32,bytes32,uint256,uint256,address)",
-      ),
+      functionSignature: contract.interface.getSighash(functionSignature),
       target: ethers.utils.getAddress(contract.address),
       caller: ethers.utils.getAddress(caller.address),
-      parameters: utils.packParameters(
-        contract.interface,
-        "grantStatusSingle(uint8,bytes32,bytes32,uint256,uint256,address)",
-        parameters,
-      ),
+      parameters: utils.packParameters(contract.interface, functionSignature, parameters),
     },
     expiry: expiry || BigNumber.from(4833857428),
   };
