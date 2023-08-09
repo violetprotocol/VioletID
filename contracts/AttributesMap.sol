@@ -28,6 +28,13 @@ contract AttributesMap {
     }
 
     /**
+     * @dev Sets multiple bits for the ID `id` using a provided `indicesMask`.
+     */
+    function setMultipleAttributes(uint256 id, uint256 indicesMask) internal {
+        _attributes[id] |= indicesMask;
+    }
+
+    /**
      * @dev Sets the bit at `index` for the ID `id`.
      */
     function setAttribute(uint256 id, uint256 index) internal {

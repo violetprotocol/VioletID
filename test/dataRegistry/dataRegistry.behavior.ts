@@ -2,13 +2,13 @@ import { expect } from "chai";
 
 import { generateAccessTokenGrantSingle } from "../utils/generateAccessToken";
 
-const US_ACCREDITED_INVESTOR_STATUS_ID = 1;
-const NON_US_PERSON_STATUS_ID = 1;
+const ENROLLED_INDIVIDUAL_STATUS_ID = 2;
+const ENROLLED_BUSINESS_STATUS_ID = 3;
+const US_ACCREDITED_INVESTOR_STATUS_ID = 4;
+const NON_US_PERSON_STATUS_ID = 5;
+const US_PERSON_STATUS_ID = 6;
 
 const MOCK_TOKEN_ID = 1;
-
-// const OWNER_ROLE = utils.keccak256(toUtf8Bytes("OWNER_ROLE"));
-// const ADMIN_ROLE = utils.keccak256(toUtf8Bytes("ADMIN_ROLE"));
 
 export function shouldBehaveLikeDataRegistry(): void {
   describe("grantStatusSingle", async function () {
@@ -21,12 +21,37 @@ export function shouldBehaveLikeDataRegistry(): void {
         expect(await this.dataRegistry.hasStatus(US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
       });
 
+      it("should grant another status", async function () {
+        await this.dataRegistry
+          .connect(this.signers.owner)
+          ["grantStatusSingle(uint256,uint256)"](NON_US_PERSON_STATUS_ID, MOCK_TOKEN_ID);
+
+        expect(await this.dataRegistry.hasStatus(NON_US_PERSON_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
+      });
+
       it("as user should fail", async function () {
         await expect(
           this.dataRegistry
             .connect(this.signers.user)
             ["grantStatusSingle(uint256,uint256)"](US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID),
         ).to.be.revertedWithCustomError(this.dataRegistry, "Unauthorized");
+      });
+
+      it("gas test", async function () {
+        await this.dataRegistry
+          .connect(this.signers.owner)
+          .grantStatusBatch(US_ACCREDITED_INVESTOR_STATUS_ID, this.tokenIds);
+
+        for (const _iterator of this.tokenIds) {
+          const randomTokenId = this.tokenIds[Math.floor(Math.random() * this.tokenIds.length)];
+          const hasStatus = await this.dataRegistry.hasStatus(NON_US_PERSON_STATUS_ID, randomTokenId);
+          console.log("hasStatus", hasStatus);
+          if (!hasStatus) {
+            await this.dataRegistry
+              .connect(this.signers.owner)
+              ["grantStatusSingle(uint256,uint256)"](NON_US_PERSON_STATUS_ID, randomTokenId);
+          }
+        }
       });
     });
 
@@ -56,6 +81,53 @@ export function shouldBehaveLikeDataRegistry(): void {
         expect(await this.dataRegistry.hasStatus(US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
       });
     });
+  });
+
+  describe("grantMultipleStatusesSingle", async function () {
+    context("With RBAC", async function () {
+      const statusesToGive = [ENROLLED_INDIVIDUAL_STATUS_ID, US_ACCREDITED_INVESTOR_STATUS_ID, US_PERSON_STATUS_ID];
+
+      const INDIVIDUAL_US_PERSON_ACCREDITED_ID = statusesToGive.reduce((acc, statusIndex) => {
+        return acc | (1 << statusIndex);
+      }, 0);
+
+      it("as owner should succeed", async function () {
+        await this.dataRegistry
+          .connect(this.signers.owner)
+          ["grantStatusesSingle(uint256,uint256)"](INDIVIDUAL_US_PERSON_ACCREDITED_ID, MOCK_TOKEN_ID);
+
+        for (const status of statusesToGive) {
+          expect(await this.dataRegistry.hasStatus(status, MOCK_TOKEN_ID)).to.be.true;
+        }
+      });
+    });
+
+    // context("With EAT", async function () {
+    //   it("should grant status", async function () {
+    //     const grantStatusSingleFunctionSignature = "grantStatusSingle(uint8,bytes32,bytes32,uint256,uint256,uint256)";
+    //     const { eat, expiry } = await generateAccessTokenGrantSingle(
+    //       this.signers.owner,
+    //       this.eatVerifier,
+    //       grantStatusSingleFunctionSignature,
+    //       this.signers.user,
+    //       this.dataRegistry,
+    //       [US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID],
+    //     );
+
+    //     await this.dataRegistry
+    //       .connect(this.signers.user)
+    //       [grantStatusSingleFunctionSignature](
+    //         eat.v,
+    //         eat.r,
+    //         eat.s,
+    //         expiry,
+    //         US_ACCREDITED_INVESTOR_STATUS_ID,
+    //         MOCK_TOKEN_ID,
+    //       );
+
+    //     expect(await this.dataRegistry.hasStatus(US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
+    //   });
+    // });
   });
 
   describe("grantStatusBatch", async function () {
