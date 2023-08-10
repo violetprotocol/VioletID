@@ -2,20 +2,24 @@
 pragma solidity ^0.8.13;
 
 interface IVioletID {
-    event TokenTypeRegistered(uint256 tokenId, string tokenName);
-    event TokenTypeUpdated(uint256 tokenId, string tokenName);
+    event AttributeRegistered(uint8 attributeId, string attributeName);
+    event AttributeNameUpdated(uint8 attributeId, string attributeName);
+    event GrantedAttribute(uint256 tokenId, uint8 attributeId);
+    event RevokedAttribute(uint256 tokenId, uint8 attributeId, bytes reason);
+    // TO REMOVE!
     event GrantedStatus(address account, uint256 tokenId);
-    event RevokedStatus(address account, uint256 tokenId, bytes reason);
 
-    function grantStatus(address account, uint256 tokenId, bytes memory data) external;
+    function grantAttribute(uint256 tokenId, uint8 attributeId) external;
 
-    function revokeStatus(address account, uint256 tokenId, bytes memory reason) external;
+    function grantAttributes(uint256 tokenId, uint256 attributeCombinationId) external;
 
-    function hasStatus(address account, uint256 tokenId) external view returns (bool);
+    function revokeAttribute(uint256 tokenId, uint8 attributeId, bytes memory reason) external;
 
-    function tokenIdToName(uint256 tokenId) external view returns (string memory);
+    function hasAttribute(uint256 tokenId, uint8 attributeId) external view returns (bool);
 
-    function registerTokenType(uint256 tokenId, string calldata tokenName) external;
+    function attributeIdToName(uint8 attributeId) external view returns (string memory);
 
-    function updateTokenTypeName(uint256 tokenId, string calldata tokenName) external;
+    function registerAttribute(uint8 attributeId, string calldata attributeName) external;
+
+    function updateAttributeName(uint8 attributeId, string calldata attributeName) external;
 }

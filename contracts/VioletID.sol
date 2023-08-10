@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155Burn
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "./AttributesMap.sol";
 import "./IVioletID.sol";
 
 contract VioletID is
@@ -18,7 +19,8 @@ contract VioletID is
     ERC1155BurnableUpgradeable,
     ERC1155SupplyUpgradeable,
     UUPSUpgradeable,
-    IVioletID
+    IVioletID,
+    AttributesMap
 {
     /// @notice Owner role for:
     ///     - Upgrading
@@ -30,13 +32,8 @@ contract VioletID is
     ///     - Minting
     ///     - Burning
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-
-    mapping(uint256 => string) public override tokenIdToName;
-
-    modifier onlyRegisteredTokens(uint256 tokenId) {
-        require(bytes(tokenIdToName[tokenId]).length > 0, "token type not registered");
-        _;
-    }
+    uint256 public nextTokenId;
+    mapping(uint8 => string) public override attributeIdToName;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -57,6 +54,8 @@ contract VioletID is
         _setRoleAdmin(ADMIN_ROLE, OWNER_ROLE); // OWNER_ROLE can change ADMIN_ROLE
         _grantRole(OWNER_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
+        // Cheaper first mint
+        nextTokenId++;
     }
 
     function setURI(string memory newuri) public onlyRole(OWNER_ROLE) {
@@ -71,41 +70,71 @@ contract VioletID is
         _unpause();
     }
 
-    function registerTokenType(uint256 tokenId, string calldata tokenName) public override onlyRole(ADMIN_ROLE) {
-        require(bytes(tokenIdToName[tokenId]).length == 0, "token type already exists");
+    function registerAttribute(uint8 attributeId, string calldata attributeName) public override onlyRole(ADMIN_ROLE) {
+        require(bytes(attributeIdToName[attributeId]).length == 0, "attribute already registered");
 
-        tokenIdToName[tokenId] = tokenName;
-        emit TokenTypeRegistered(tokenId, tokenName);
+        attributeIdToName[attributeId] = attributeName;
+        emit AttributeRegistered(attributeId, attributeName);
     }
 
-    function updateTokenTypeName(
+    function updateAttributeName(
+        uint8 attributeId,
+        string calldata attributeName
+    ) public override onlyRole(ADMIN_ROLE) {
+        require(bytes(attributeIdToName[attributeId]).length > 0, "attribute not registered");
+        attributeIdToName[attributeId] = attributeName;
+        emit AttributeNameUpdated(attributeId, attributeName);
+    }
+
+    function grantAttribute(uint256 tokenId, uint8 attributeId) public override onlyRole(ADMIN_ROLE) {
+        require(!hasAttribute(tokenId, attributeId), "token already has this attribute");
+        setAttribute(tokenId, attributeId);
+        // TODO: Remove this event?
+        emit GrantedAttribute(tokenId, attributeId);
+    }
+
+    function grantAttributes(uint256 tokenId, uint256 attributeCombinationId) public override onlyRole(ADMIN_ROLE) {
+        setMultipleAttributes(tokenId, attributeCombinationId);
+    }
+
+    function revokeAttribute(
         uint256 tokenId,
-        string calldata tokenName
-    ) public override onlyRole(ADMIN_ROLE) onlyRegisteredTokens(tokenId) {
-        tokenIdToName[tokenId] = tokenName;
-        emit TokenTypeUpdated(tokenId, tokenName);
+        uint8 attributeId,
+        bytes memory reason
+    ) public override onlyRole(ADMIN_ROLE) {
+        require(hasAttribute(tokenId, attributeId), "token does not have this attribute");
+        unsetAttribute(tokenId, attributeId);
+        emit RevokedAttribute(tokenId, attributeId, reason);
     }
 
-    function grantStatus(
+    function hasAttribute(uint256 tokenId, uint8 attributeId) public view override returns (bool) {
+        return isAttributeSet(tokenId, attributeId);
+    }
+
+    function mintWithAttributes(address account, uint256 attributeCombinationId) public onlyRole(ADMIN_ROLE) {
+        _mint(account, nextTokenId, 1, toBytes(attributeCombinationId));
+        unchecked {
+            ++nextTokenId;
+        }
+    }
+
+    // ↓↓↓ Quick addition to try to maintain the previous function to compare gas cost ↓↓↓↓
+    // TO REMOVE
+    modifier legacyOnlyRegisteredAttribute(uint8 id) {
+        require(bytes(attributeIdToName[id]).length > 0, "token type not registered");
+        _;
+    }
+
+    // But this costs 67146 gas, not 87000+
+    function legacyGrantStatus(
         address account,
         uint256 tokenId,
         bytes memory data
-    ) public override onlyRole(ADMIN_ROLE) onlyRegisteredTokens(tokenId) {
-        require(!hasStatus(account, tokenId), "account already granted status");
+    ) public onlyRole(ADMIN_ROLE) legacyOnlyRegisteredAttribute(uint8(tokenId)) {
+        require(balanceOf(account, tokenId) == 0, "account already granted status");
 
         _mint(account, tokenId, 1, data);
         emit GrantedStatus(account, tokenId);
-    }
-
-    function revokeStatus(address account, uint256 tokenId, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
-        require(hasStatus(account, tokenId), "account not in revocable status");
-
-        _burn(account, tokenId, 1);
-        emit RevokedStatus(account, tokenId, reason);
-    }
-
-    function hasStatus(address account, uint256 tokenId) public view override returns (bool) {
-        return balanceOf(account, tokenId) > 0;
     }
 
     function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
@@ -126,14 +155,23 @@ contract VioletID is
     }
 
     function _beforeTokenTransfer(
-        address operator,
+        address,
         address from,
-        address to,
+        address,
         uint256[] memory ids,
-        uint256[] memory amounts,
+        uint256[] memory,
         bytes memory data
     ) internal override(ERC1155Upgradeable, ERC1155SupplyUpgradeable) whenNotPaused {
-        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+        if (from == address(0) && data.length > 0) {
+            grantAttributes(ids[0], uint256(bytes32(data)));
+        }
+    }
+
+    function toBytes(uint256 x) internal pure returns (bytes memory b) {
+        b = new bytes(32);
+        assembly {
+            mstore(add(b, 32), x)
+        }
     }
 
     // solhint-disable-next-line no-empty-blocks
