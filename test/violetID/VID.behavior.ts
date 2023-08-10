@@ -150,6 +150,14 @@ export function shouldBehaveLikeVioletID(): void {
       });
 
       context("EOA target", async function () {
+        it("gas", async function () {
+          const tx = await this.violetID
+            .connect(this.signers.admin)
+            .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00");
+          const receipt = await tx.wait();
+          console.log(receipt.cumulativeGasUsed);
+        });
+
         it("as admin should succeed", async function () {
           await expect(
             this.violetID
@@ -287,6 +295,196 @@ export function shouldBehaveLikeVioletID(): void {
             this.violetID
               .connect(this.signers.admin)
               .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
+          ).to.be.revertedWith("token type not registered");
+
+          expect(
+            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
+          ).to.be.false;
+        });
+      });
+    });
+  });
+
+  describe("batchGrant", async function () {
+    const generateAddresses = (numberOfAddresses: number): string[] => {
+      return [...Array(numberOfAddresses)].map(() => {
+        const wallet = ethers.Wallet.createRandom();
+        return wallet.address;
+      });
+    };
+
+    let one_address = generateAddresses(1);
+    let five_addresses = generateAddresses(5);
+    let twenty_addresses = generateAddresses(20);
+    let hundred_addresses = generateAddresses(100);
+    let fivehun_addresses = generateAddresses(500);
+    let thousand_addresses = generateAddresses(1000);
+
+    context("with registered token", async function () {
+      beforeEach("register token", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
+        ).to.not.be.reverted;
+      });
+
+      context("gas comparison", async function () {
+        it("grants to a single address", async function () {
+          await expect(
+            this.violetID.connect(this.signers.admin).batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, one_address),
+          )
+            .to.emit(this.violetID, "BatchGranted")
+            .withArgs(one_address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
+
+          const tx = await this.violetID
+            .connect(this.signers.admin)
+            .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, generateAddresses(1));
+          const receipt = await tx.wait();
+          console.log(receipt.cumulativeGasUsed);
+        });
+
+        it("grants to five addresses", async function () {
+          await expect(
+            this.violetID.connect(this.signers.admin).batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, five_addresses),
+          )
+            .to.emit(this.violetID, "BatchGranted")
+            .withArgs(five_addresses, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
+
+          const tx = await this.violetID
+            .connect(this.signers.admin)
+            .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, generateAddresses(5));
+          const receipt = await tx.wait();
+          console.log(receipt.cumulativeGasUsed);
+        });
+
+        it("grants to ten addresses", async function () {
+          const tx = await this.violetID
+            .connect(this.signers.admin)
+            .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, generateAddresses(10));
+          const receipt = await tx.wait();
+          console.log(receipt.cumulativeGasUsed);
+        });
+
+        it("grants to twenty addresses", async function () {
+          const tx = await this.violetID
+            .connect(this.signers.admin)
+            .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, generateAddresses(20));
+          const receipt = await tx.wait();
+          console.log(receipt.cumulativeGasUsed);
+        });
+
+        it("grants to thirty addresses", async function () {
+          const tx = await this.violetID
+            .connect(this.signers.admin)
+            .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, generateAddresses(30));
+          const receipt = await tx.wait();
+          console.log(receipt.cumulativeGasUsed);
+        });
+
+        it("grants to forty addresses", async function () {
+          const tx = await this.violetID
+            .connect(this.signers.admin)
+            .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, generateAddresses(40));
+          const receipt = await tx.wait();
+          console.log(receipt.cumulativeGasUsed);
+        });
+
+        it("grants to fifty addresses", async function () {
+          const tx = await this.violetID
+            .connect(this.signers.admin)
+            .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, generateAddresses(50));
+          const receipt = await tx.wait();
+          console.log(receipt.cumulativeGasUsed);
+        });
+
+        it("grants to hundred addresses", async function () {
+          const tx = await this.violetID
+            .connect(this.signers.admin)
+            .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, generateAddresses(100));
+          const receipt = await tx.wait();
+          console.log(receipt.cumulativeGasUsed);
+        });
+
+        it("grants to five hundred addresses", async function () {
+          await expect(
+            this.violetID
+              .connect(this.signers.admin)
+              .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, fivehun_addresses),
+          )
+            .to.emit(this.violetID, "BatchGranted")
+            .withArgs(fivehun_addresses, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
+
+          const tx = await this.violetID
+            .connect(this.signers.admin)
+            .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, generateAddresses(500));
+          const receipt = await tx.wait();
+          console.log(receipt.cumulativeGasUsed);
+        });
+
+        // it("grants to thousand addresses", async function () {
+        //   await expect(
+        //     this.violetID
+        //       .connect(this.signers.admin)
+        //       .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, thousand_addresses),
+        //   )
+        //     .to.emit(this.violetID, "BatchGranted")
+        //     .withArgs(thousand_addresses, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
+
+        //   const tx = await this.violetID
+        //     .connect(this.signers.admin)
+        //     .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, generateAddresses(1000));
+        //   const receipt = await tx.wait();
+        //   console.log(receipt.cumulativeGasUsed);
+        // });
+      });
+
+      context("EOA target", async function () {
+        it("as admin should succeed", async function () {
+          await expect(
+            this.violetID.connect(this.signers.admin).batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, one_address),
+          )
+            .to.emit(this.violetID, "BatchGranted")
+            .withArgs(one_address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
+
+          expect(await this.violetID.hasStatus(one_address[0], MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.be.true;
+        });
+
+        it("as owner should fail", async function () {
+          await expect(
+            this.violetID.connect(this.signers.owner).batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, one_address),
+          ).to.be.revertedWith(
+            `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+          );
+        });
+
+        it("as user should fail", async function () {
+          await expect(
+            this.violetID.connect(this.signers.user).batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, one_address),
+          ).to.be.revertedWith(
+            `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+          );
+        });
+      });
+    });
+
+    context("without registered token", async function () {
+      context("EOA target", async function () {
+        it("as admin should fail", async function () {
+          await expect(
+            this.violetID.connect(this.signers.admin).batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, one_address),
+          ).to.be.revertedWith("token type not registered");
+
+          expect(await this.violetID.hasStatus(one_address[0], MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.be.false;
+        });
+      });
+
+      context("Contract target", async function () {
+        it("as admin should fail", async function () {
+          await expect(
+            this.violetID
+              .connect(this.signers.admin)
+              .batchGrant(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, [this.mockContract.address]),
           ).to.be.revertedWith("token type not registered");
 
           expect(

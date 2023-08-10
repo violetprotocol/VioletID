@@ -97,6 +97,17 @@ contract VioletID is
         emit GrantedStatus(account, tokenId);
     }
 
+    function batchGrant(
+        uint256 tokenId,
+        address[] calldata accounts
+    ) public override onlyRole(ADMIN_ROLE) onlyRegisteredTokens(tokenId) {
+        for (uint256 i = 0; i < accounts.length; i++) {
+            if (!hasStatus(accounts[i], tokenId)) _mint(accounts[i], tokenId, 1, "");
+        }
+
+        emit BatchGranted(accounts, tokenId);
+    }
+
     function revokeStatus(address account, uint256 tokenId, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
         require(hasStatus(account, tokenId), "account not in revocable status");
 

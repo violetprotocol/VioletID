@@ -5,9 +5,12 @@ interface IVioletID {
     event TokenTypeRegistered(uint256 tokenId, string tokenName);
     event TokenTypeUpdated(uint256 tokenId, string tokenName);
     event GrantedStatus(address account, uint256 tokenId);
+    event BatchGranted(address[] accounts, uint256 tokenId);
     event RevokedStatus(address account, uint256 tokenId, bytes reason);
 
     function grantStatus(address account, uint256 tokenId, bytes memory data) external;
+
+    function batchGrant(uint256 tokenId, address[] calldata accounts) external;
 
     function revokeStatus(address account, uint256 tokenId, bytes memory reason) external;
 
