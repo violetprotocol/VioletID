@@ -17,7 +17,7 @@ export function shouldBehaveLikeDataRegistry(): void {
       it("as owner should succeed", async function () {
         await this.dataRegistry
           .connect(this.signers.owner)
-          ["grantStatusSingle(uint256,uint256)"](ENROLLED_BUSINESS_STATUS_ID, MOCK_TOKEN_ID);
+          ["grantStatusSingle(uint8,uint256)"](ENROLLED_BUSINESS_STATUS_ID, MOCK_TOKEN_ID);
 
         expect(await this.dataRegistry.hasStatus(ENROLLED_BUSINESS_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
       });
@@ -25,11 +25,11 @@ export function shouldBehaveLikeDataRegistry(): void {
       it("granting another status should work", async function () {
         await this.dataRegistry
           .connect(this.signers.owner)
-          ["grantStatusSingle(uint256,uint256)"](ENROLLED_INDIVIDUAL_STATUS_ID, MOCK_TOKEN_ID);
+          ["grantStatusSingle(uint8,uint256)"](ENROLLED_INDIVIDUAL_STATUS_ID, MOCK_TOKEN_ID);
 
         await this.dataRegistry
           .connect(this.signers.owner)
-          ["grantStatusSingle(uint256,uint256)"](NON_US_PERSON_STATUS_ID, MOCK_TOKEN_ID);
+          ["grantStatusSingle(uint8,uint256)"](NON_US_PERSON_STATUS_ID, MOCK_TOKEN_ID);
 
         expect(await this.dataRegistry.hasStatus(ENROLLED_INDIVIDUAL_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
         expect(await this.dataRegistry.hasStatus(NON_US_PERSON_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
@@ -39,7 +39,7 @@ export function shouldBehaveLikeDataRegistry(): void {
         await expect(
           this.dataRegistry
             .connect(this.signers.user)
-            ["grantStatusSingle(uint256,uint256)"](US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID),
+            ["grantStatusSingle(uint8,uint256)"](US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID),
         ).to.be.revertedWithCustomError(this.dataRegistry, "Unauthorized");
       });
 
@@ -58,7 +58,7 @@ export function shouldBehaveLikeDataRegistry(): void {
           if (!hasStatus) {
             await this.dataRegistry
               .connect(this.signers.owner)
-              ["grantStatusSingle(uint256,uint256)"](NON_US_PERSON_STATUS_ID, randomTokenId);
+              ["grantStatusSingle(uint8,uint256)"](NON_US_PERSON_STATUS_ID, randomTokenId);
           }
         }
       });

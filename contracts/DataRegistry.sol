@@ -32,7 +32,7 @@ contract DataRegistry is AccessTokenConsumer, AttributesMap {
         setAttribute(tokenId, statusId);
     }
 
-    function grantStatusSingle(uint256 statusId, uint256 tokenId) public {
+    function grantStatusSingle(uint8 statusId, uint256 tokenId) public {
         if (msg.sender != owner) revert Unauthorized();
         setAttribute(tokenId, statusId);
     }
