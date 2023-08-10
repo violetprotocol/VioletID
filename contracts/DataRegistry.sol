@@ -18,7 +18,7 @@ contract DataRegistry is AccessTokenConsumer, AttributesMap {
     }
 
     function hasStatus(uint256 statusId, uint256 tokenId) public view returns (bool) {
-        return getAttribute(tokenId, statusId);
+        return isAttributeSet(tokenId, statusId);
     }
 
     function grantStatusSingle(

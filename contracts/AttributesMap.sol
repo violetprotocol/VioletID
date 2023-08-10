@@ -11,7 +11,7 @@ contract AttributesMap {
     /**
      * @dev Returns whether the bit at `index` is set for the ID `id`.
      */
-    function getAttribute(uint256 id, uint256 index) internal view returns (bool) {
+    function isAttributeSet(uint256 id, uint256 index) internal view returns (bool) {
         uint256 mask = 1 << index;
         return _attributes[id] & mask != 0;
     }
