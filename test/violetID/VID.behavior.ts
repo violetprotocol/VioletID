@@ -159,6 +159,7 @@ export function shouldBehaveLikeVioletID(): void {
           .connect(this.signers.admin)
           .mintWithAttributes(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID);
 
+        expect(await this.violetID.hasAttributes(FIRST_TOKEN_ID, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID)).to.be.true;
         expect(await this.violetID.hasAttribute(FIRST_TOKEN_ID, Attribute.ENROLLED_INDIVIDUAL)).to.be.true;
         expect(await this.violetID.hasAttribute(FIRST_TOKEN_ID, Attribute.US_ACCREDITED_INVESTOR)).to.be.true;
       });

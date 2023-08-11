@@ -108,6 +108,10 @@ contract VioletID is
         return isAttributeSet(tokenId, attributeId);
     }
 
+    function hasAttributes(uint256 tokenId, uint256 attributeCombinationId) public view override returns (bool) {
+        return areAttributesSet(tokenId, attributeCombinationId);
+    }
+
     function mintWithAttributes(address account, uint256 attributeCombinationId) public onlyRole(ADMIN_ROLE) {
         _mint(account, nextTokenId, 1, toBytes(attributeCombinationId));
         unchecked {

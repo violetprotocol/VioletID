@@ -17,6 +17,13 @@ contract AttributesMap {
     }
 
     /**
+     * @dev Returns whether a specific set of bits are set for the ID `id`.
+     */
+    function areAttributesSet(uint256 id, uint256 mask) internal view returns (bool) {
+        return _attributes[id] & mask == mask;
+    }
+
+    /**
      * @dev Sets the bit at `index` to the boolean `value` for the ID `id`.
      */
     function setAttributeTo(uint256 id, uint256 index, bool value) internal {

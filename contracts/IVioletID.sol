@@ -15,6 +15,8 @@ interface IVioletID {
 
     function hasAttribute(uint256 tokenId, uint8 attributeId) external view returns (bool);
 
+    function hasAttributes(uint256 tokenId, uint256 attributeCombinationId) external view returns (bool);
+
     function attributeIdToName(uint8 attributeId) external view returns (string memory);
 
     function registerAttribute(uint8 attributeId, string calldata attributeName) external;
