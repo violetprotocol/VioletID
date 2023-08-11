@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { generateAccessTokenGrantSingle } from "../utils/generateAccessToken";
+import { generateAccessToken } from "../utils/generateAccessToken";
 
 const ENROLLED_INDIVIDUAL_STATUS_ID = 2;
 const ENROLLED_BUSINESS_STATUS_ID = 3;
@@ -67,7 +67,7 @@ export function shouldBehaveLikeDataRegistry(): void {
     context("With EAT", async function () {
       it("should grant status", async function () {
         const grantStatusSingleFunctionSignature = "grantStatusSingle(uint8,bytes32,bytes32,uint256,uint256,uint256)";
-        const { eat, expiry } = await generateAccessTokenGrantSingle(
+        const { eat, expiry } = await generateAccessToken(
           this.signers.owner,
           this.eatVerifier,
           grantStatusSingleFunctionSignature,
@@ -115,7 +115,7 @@ export function shouldBehaveLikeDataRegistry(): void {
     // context("With EAT", async function () {
     //   it("should grant status", async function () {
     //     const grantStatusSingleFunctionSignature = "grantStatusSingle(uint8,bytes32,bytes32,uint256,uint256,uint256)";
-    //     const { eat, expiry } = await generateAccessTokenGrantSingle(
+    //     const { eat, expiry } = await generateAccessToken(
     //       this.signers.owner,
     //       this.eatVerifier,
     //       grantStatusSingleFunctionSignature,

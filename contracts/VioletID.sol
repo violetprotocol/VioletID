@@ -7,8 +7,10 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "./AttributesMap.sol";
+
 import "./IVioletID.sol";
+import "./AttributesMap.sol";
+import "./temp/AccessTokenConsumerUpgradeable.sol";
 
 contract VioletID is
     Initializable,
@@ -18,7 +20,8 @@ contract VioletID is
     ERC1155BurnableUpgradeable,
     UUPSUpgradeable,
     IVioletID,
-    AttributesMap
+    AttributesMap,
+    AccessTokenConsumerUpgradeable
 {
     /// @notice Owner role for:
     ///     - Upgrading
@@ -38,12 +41,13 @@ contract VioletID is
         _disableInitializers();
     }
 
-    function initialize() public initializer {
+    function initialize(address _EATVerifier) public initializer {
         __ERC1155_init("");
         __AccessControl_init();
         __Pausable_init();
         __ERC1155Burnable_init();
         __UUPSUpgradeable_init();
+        __AccessTokenConsumer_init(_EATVerifier);
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
@@ -119,6 +123,19 @@ contract VioletID is
         }
     }
 
+    function claimTokenWithAttributes(
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        uint256 expiry,
+        uint256 attributeCombinationId
+    ) public requiresAuth(v, r, s, expiry) {
+        _mint(msg.sender, nextTokenId, 1, toBytes(attributeCombinationId));
+        unchecked {
+            ++nextTokenId;
+        }
+    }
+
     function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
         revert("transfers disallowed");
     }
@@ -147,7 +164,7 @@ contract VioletID is
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
 
         if (from == address(0) && data.length > 0) {
-            grantAttributes(ids[0], uint256(bytes32(data)));
+            setMultipleAttributes(ids[0], uint256(bytes32(data)));
         }
     }
 

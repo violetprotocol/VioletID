@@ -1,6 +1,6 @@
 import { expect } from "chai";
 
-import { generateAccessTokenGrantSingle } from "../utils/generateAccessToken";
+import { generateAccessToken } from "../utils/generateAccessToken";
 
 const MAUVE_VERIFIED_ENTITY_STATUS_TOKENID = 1;
 
@@ -31,7 +31,7 @@ export function shouldBehaveLikeSimpleRegistry(): void {
       it("should grant status", async function () {
         const grantStatusSingleFunctionSignature = "grantStatusSingle(uint8,bytes32,bytes32,uint256,uint256,address)";
         const userAddress = this.signers.user.address;
-        const { eat, expiry } = await generateAccessTokenGrantSingle(
+        const { eat, expiry } = await generateAccessToken(
           this.signers.owner,
           this.eatVerifier,
           grantStatusSingleFunctionSignature,

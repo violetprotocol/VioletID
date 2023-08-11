@@ -3,6 +3,7 @@ import { utils } from "ethers";
 import { toUtf8Bytes } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { generateAccessToken } from "../utils/generateAccessToken";
 import { getAttributeCombinationId } from "../utils/getAttributeCombinationId";
 
 enum Attribute {
@@ -22,6 +23,8 @@ const INDIVIDUAL_US_ACCREDITED_COMBINATION_ID = getAttributeCombinationId([
 
 const OWNER_ROLE = utils.keccak256(toUtf8Bytes("OWNER_ROLE"));
 const ADMIN_ROLE = utils.keccak256(toUtf8Bytes("ADMIN_ROLE"));
+
+const FIRST_TOKEN_ID = 1;
 
 export function shouldBehaveLikeVioletID(): void {
   describe("grantRole", async function () {
@@ -151,10 +154,37 @@ export function shouldBehaveLikeVioletID(): void {
     });
   });
 
+  describe("claimTokenWithAttributes", async function () {
+    context("EOA target", async function () {
+      it("with proper EAT should succeed", async function () {
+        const claimTokenWithAttributesFunctionSignature =
+          "claimTokenWithAttributes(uint8,bytes32,bytes32,uint256,uint256)";
+
+        const { eat, expiry } = await generateAccessToken(
+          this.signers.owner,
+          this.eatVerifier,
+          claimTokenWithAttributesFunctionSignature,
+          this.signers.user,
+          this.violetID,
+          [INDIVIDUAL_US_ACCREDITED_COMBINATION_ID],
+        );
+        const { v, r, s } = eat;
+
+        await this.violetID
+          .connect(this.signers.user)
+          .claimTokenWithAttributes(v, r, s, expiry, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID);
+
+        expect(await this.violetID.balanceOf(this.signers.user.address, FIRST_TOKEN_ID)).to.eq(1);
+        expect(await this.violetID.hasAttributes(FIRST_TOKEN_ID, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID)).to.be.true;
+        expect(await this.violetID.hasAttribute(FIRST_TOKEN_ID, Attribute.ENROLLED_INDIVIDUAL)).to.be.true;
+        expect(await this.violetID.hasAttribute(FIRST_TOKEN_ID, Attribute.US_ACCREDITED_INVESTOR)).to.be.true;
+      });
+    });
+  });
+
   describe("mintWithAttributes", async function () {
     context("EOA target", async function () {
       it("as admin should succeed", async function () {
-        const FIRST_TOKEN_ID = 1;
         await this.violetID
           .connect(this.signers.admin)
           .mintWithAttributes(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID);

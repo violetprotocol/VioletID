@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { SimpleRegistry } from "../../src/types";
 
-export const generateAccessTokenGrantSingle = async (
+export const generateAccessToken = async (
   signer: SignerWithAddress,
   verifyingContract: Contract,
   functionSignature: string,
