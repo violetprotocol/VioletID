@@ -5,7 +5,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./AttributesMap.sol";
@@ -17,7 +16,6 @@ contract VioletID is
     AccessControlUpgradeable,
     PausableUpgradeable,
     ERC1155BurnableUpgradeable,
-    ERC1155SupplyUpgradeable,
     UUPSUpgradeable,
     IVioletID,
     AttributesMap
@@ -45,7 +43,6 @@ contract VioletID is
         __AccessControl_init();
         __Pausable_init();
         __ERC1155Burnable_init();
-        __ERC1155Supply_init();
         __UUPSUpgradeable_init();
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -118,25 +115,6 @@ contract VioletID is
         }
     }
 
-    // ↓↓↓ Quick addition to try to maintain the previous function to compare gas cost ↓↓↓↓
-    // TO REMOVE
-    modifier legacyOnlyRegisteredAttribute(uint8 id) {
-        require(bytes(attributeIdToName[id]).length > 0, "token type not registered");
-        _;
-    }
-
-    // But this costs 67146 gas, not 87000+
-    function legacyGrantStatus(
-        address account,
-        uint256 tokenId,
-        bytes memory data
-    ) public onlyRole(ADMIN_ROLE) legacyOnlyRegisteredAttribute(uint8(tokenId)) {
-        require(balanceOf(account, tokenId) == 0, "account already granted status");
-
-        _mint(account, tokenId, 1, data);
-        emit GrantedStatus(account, tokenId);
-    }
-
     function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
         revert("transfers disallowed");
     }
@@ -155,13 +133,15 @@ contract VioletID is
     }
 
     function _beforeTokenTransfer(
-        address,
+        address operator,
         address from,
-        address,
+        address to,
         uint256[] memory ids,
-        uint256[] memory,
+        uint256[] memory amounts,
         bytes memory data
-    ) internal override(ERC1155Upgradeable, ERC1155SupplyUpgradeable) whenNotPaused {
+    ) internal override(ERC1155Upgradeable) whenNotPaused {
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+
         if (from == address(0) && data.length > 0) {
             grantAttributes(ids[0], uint256(bytes32(data)));
         }

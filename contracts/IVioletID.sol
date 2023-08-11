@@ -6,8 +6,6 @@ interface IVioletID {
     event AttributeNameUpdated(uint8 attributeId, string attributeName);
     event GrantedAttribute(uint256 tokenId, uint8 attributeId);
     event RevokedAttribute(uint256 tokenId, uint8 attributeId, bytes reason);
-    // TO REMOVE!
-    event GrantedStatus(address account, uint256 tokenId);
 
     function grantAttribute(uint256 tokenId, uint8 attributeId) external;
 

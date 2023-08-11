@@ -163,12 +163,6 @@ export function shouldBehaveLikeVioletID(): void {
         expect(await this.violetID.hasAttribute(FIRST_TOKEN_ID, Attribute.US_ACCREDITED_INVESTOR)).to.be.true;
       });
 
-      it("test legacy simple mint", async function () {
-        const TOKEN_ID = 1;
-        this.violetID.connect(this.signers.admin).registerAttribute(TOKEN_ID, "whatever");
-        await this.violetID.connect(this.signers.admin).legacyGrantStatus(this.signers.user.address, TOKEN_ID, "0x00");
-      });
-
       it("as non-admin should fail", async function () {
         const FIRST_TOKEN_ID = 1;
         await expect(
