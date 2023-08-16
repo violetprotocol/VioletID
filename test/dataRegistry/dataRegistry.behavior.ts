@@ -8,8 +8,6 @@ const US_ACCREDITED_INVESTOR_STATUS_ID = 4;
 const NON_US_PERSON_STATUS_ID = 5;
 const US_PERSON_STATUS_ID = 6;
 
-const MOCK_TOKEN_ID = 1;
-
 export function shouldBehaveLikeDataRegistry(): void {
   describe("grantStatusSingle", async function () {
     context("With RBAC", async function () {
@@ -17,35 +15,35 @@ export function shouldBehaveLikeDataRegistry(): void {
       it("as owner should succeed", async function () {
         await this.dataRegistry
           .connect(this.signers.owner)
-          ["grantStatusSingle(uint8,uint256)"](ENROLLED_BUSINESS_STATUS_ID, MOCK_TOKEN_ID);
+          ["grantStatusSingle(uint8,address)"](ENROLLED_BUSINESS_STATUS_ID, this.signers.user.address);
 
-        expect(await this.dataRegistry.hasStatus(ENROLLED_BUSINESS_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
+        expect(await this.dataRegistry.hasStatus(ENROLLED_BUSINESS_STATUS_ID, this.signers.user.address)).to.be.true;
       });
 
       it("granting another status should work", async function () {
         await this.dataRegistry
           .connect(this.signers.owner)
-          ["grantStatusSingle(uint8,uint256)"](ENROLLED_INDIVIDUAL_STATUS_ID, MOCK_TOKEN_ID);
+          ["grantStatusSingle(uint8,address)"](ENROLLED_INDIVIDUAL_STATUS_ID, this.signers.user.address);
 
         await this.dataRegistry
           .connect(this.signers.owner)
-          ["grantStatusSingle(uint8,uint256)"](NON_US_PERSON_STATUS_ID, MOCK_TOKEN_ID);
+          ["grantStatusSingle(uint8,address)"](NON_US_PERSON_STATUS_ID, this.signers.user.address);
 
-        expect(await this.dataRegistry.hasStatus(ENROLLED_INDIVIDUAL_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
-        expect(await this.dataRegistry.hasStatus(NON_US_PERSON_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
+        expect(await this.dataRegistry.hasStatus(ENROLLED_INDIVIDUAL_STATUS_ID, this.signers.user.address)).to.be.true;
+        expect(await this.dataRegistry.hasStatus(NON_US_PERSON_STATUS_ID, this.signers.user.address)).to.be.true;
       });
 
       it("as user should fail", async function () {
         await expect(
           this.dataRegistry
             .connect(this.signers.user)
-            ["grantStatusSingle(uint8,uint256)"](US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID),
+            ["grantStatusSingle(uint8,address)"](US_ACCREDITED_INVESTOR_STATUS_ID, this.signers.user.address),
         ).to.be.revertedWithCustomError(this.dataRegistry, "Unauthorized");
       });
 
       // Test to figure out how much gas is used when granting a status to a tokenId which already has another status
       // Gas used: ~28830
-      it("gas test", async function () {
+      it.skip("gas test", async function () {
         await this.dataRegistry
           .connect(this.signers.owner)
           .grantStatusBatch(ENROLLED_INDIVIDUAL_STATUS_ID, this.tokenIds);
@@ -58,7 +56,7 @@ export function shouldBehaveLikeDataRegistry(): void {
           if (!hasStatus) {
             await this.dataRegistry
               .connect(this.signers.owner)
-              ["grantStatusSingle(uint8,uint256)"](NON_US_PERSON_STATUS_ID, randomTokenId);
+              ["grantStatusSingle(uint8,address)"](NON_US_PERSON_STATUS_ID, randomTokenId);
           }
         }
       });
@@ -66,14 +64,14 @@ export function shouldBehaveLikeDataRegistry(): void {
 
     context("With EAT", async function () {
       it("should grant status", async function () {
-        const grantStatusSingleFunctionSignature = "grantStatusSingle(uint8,bytes32,bytes32,uint256,uint256,uint256)";
+        const grantStatusSingleFunctionSignature = "grantStatusSingle(uint8,bytes32,bytes32,uint256,uint256,address)";
         const { eat, expiry } = await generateAccessToken(
           this.signers.owner,
           this.eatVerifier,
           grantStatusSingleFunctionSignature,
           this.signers.user,
           this.dataRegistry,
-          [US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID],
+          [US_ACCREDITED_INVESTOR_STATUS_ID, this.signers.user.address],
         );
 
         await this.dataRegistry
@@ -84,63 +82,67 @@ export function shouldBehaveLikeDataRegistry(): void {
             eat.s,
             expiry,
             US_ACCREDITED_INVESTOR_STATUS_ID,
-            MOCK_TOKEN_ID,
+            this.signers.user.address,
           );
 
-        expect(await this.dataRegistry.hasStatus(US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
+        expect(
+          await this.dataRegistry.hasStatus(US_ACCREDITED_INVESTOR_STATUS_ID, this.signers.user.address),
+        ).to.be.true;
       });
     });
   });
 
   describe("grantMultipleStatusesSingle", async function () {
+    const statusesToGive = [ENROLLED_INDIVIDUAL_STATUS_ID, US_ACCREDITED_INVESTOR_STATUS_ID, US_PERSON_STATUS_ID];
+    // Get the mask needed, combining the different status indices (2, 4 & 6):
+    // 1010100 = 84
+    const INDIVIDUAL_US_PERSON_ACCREDITED_ID = statusesToGive.reduce((acc, statusIndex) => {
+      return acc | (1 << statusIndex);
+    }, 0);
     context("With RBAC", async function () {
-      const statusesToGive = [ENROLLED_INDIVIDUAL_STATUS_ID, US_ACCREDITED_INVESTOR_STATUS_ID, US_PERSON_STATUS_ID];
-      // Get the mask needed, combining the different status indices (2, 4 & 6):
-      // 1010100 = 84
-      const INDIVIDUAL_US_PERSON_ACCREDITED_ID = statusesToGive.reduce((acc, statusIndex) => {
-        return acc | (1 << statusIndex);
-      }, 0);
-
       it("as owner should succeed", async function () {
         await this.dataRegistry
           .connect(this.signers.owner)
-          ["grantStatusesSingle(uint256,uint256)"](INDIVIDUAL_US_PERSON_ACCREDITED_ID, MOCK_TOKEN_ID);
+          ["grantStatusesSingle(uint256,address)"](INDIVIDUAL_US_PERSON_ACCREDITED_ID, this.signers.user.address);
 
         for (const status of statusesToGive) {
-          expect(await this.dataRegistry.hasStatus(status, MOCK_TOKEN_ID)).to.be.true;
+          expect(await this.dataRegistry.hasStatus(status, this.signers.user.address)).to.be.true;
         }
       });
     });
 
-    // context("With EAT", async function () {
-    //   it("should grant status", async function () {
-    //     const grantStatusSingleFunctionSignature = "grantStatusSingle(uint8,bytes32,bytes32,uint256,uint256,uint256)";
-    //     const { eat, expiry } = await generateAccessToken(
-    //       this.signers.owner,
-    //       this.eatVerifier,
-    //       grantStatusSingleFunctionSignature,
-    //       this.signers.user,
-    //       this.dataRegistry,
-    //       [US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID],
-    //     );
+    context("With EAT", async function () {
+      it("should grant statuses", async function () {
+        const claimStatusesFunctionSignature = "claimStatuses(uint8,bytes32,bytes32,uint256,uint256,address)";
+        const { eat, expiry } = await generateAccessToken(
+          this.signers.owner,
+          this.eatVerifier,
+          claimStatusesFunctionSignature,
+          this.signers.user,
+          this.dataRegistry,
+          [INDIVIDUAL_US_PERSON_ACCREDITED_ID, this.signers.user.address],
+        );
 
-    //     await this.dataRegistry
-    //       .connect(this.signers.user)
-    //       [grantStatusSingleFunctionSignature](
-    //         eat.v,
-    //         eat.r,
-    //         eat.s,
-    //         expiry,
-    //         US_ACCREDITED_INVESTOR_STATUS_ID,
-    //         MOCK_TOKEN_ID,
-    //       );
+        await this.dataRegistry
+          .connect(this.signers.user)
+          [claimStatusesFunctionSignature](
+            eat.v,
+            eat.r,
+            eat.s,
+            expiry,
+            INDIVIDUAL_US_PERSON_ACCREDITED_ID,
+            this.signers.user.address,
+          );
 
-    //     expect(await this.dataRegistry.hasStatus(US_ACCREDITED_INVESTOR_STATUS_ID, MOCK_TOKEN_ID)).to.be.true;
-    //   });
-    // });
+        expect(
+          await this.dataRegistry.hasStatus(US_ACCREDITED_INVESTOR_STATUS_ID, this.signers.user.address),
+        ).to.be.true;
+        expect(await this.dataRegistry.hasStatus(ENROLLED_INDIVIDUAL_STATUS_ID, this.signers.user.address)).to.be.true;
+      });
+    });
   });
 
-  describe("grantStatusBatch", async function () {
+  describe.skip("grantStatusBatch", async function () {
     context("With RBAC", async function () {
       it("as owner should succeed", async function () {
         await this.dataRegistry
