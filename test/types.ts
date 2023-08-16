@@ -1,8 +1,8 @@
 import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 
 import { SimpleRegistry } from "../src/types";
+import type { VioletID } from "../src/types";
 import { MockContract } from "../src/types/contracts/mock/MockContract";
-import type { VioletID } from "../types";
 
 type Fixture<T> = () => Promise<T>;
 
