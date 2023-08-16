@@ -80,22 +80,6 @@ contract VioletID is
         setMultipleStatuses(account, statusCombinationId);
     }
 
-    function registerStatus(uint8 statusId, string calldata statusName) public override onlyRole(ADMIN_ROLE) {
-        if (bytes(statusIdToName[statusId]).length > 0) revert StatusAlreadyRegistered();
-
-        statusIdToName[statusId] = statusName;
-
-        emit StatusRegistered(statusId, statusName);
-    }
-
-    function updateStatusName(uint8 statusId, string calldata statusName) public override onlyRole(ADMIN_ROLE) {
-        if (bytes(statusIdToName[statusId]).length == 0) revert StatusNotYetRegistered();
-
-        statusIdToName[statusId] = statusName;
-
-        emit StatusNameUpdated(statusId, statusName);
-    }
-
     function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
         if (hasStatus(account, statusId)) revert AccountAlreadyHasStatus(statusId);
         setStatus(account, statusId);
@@ -112,6 +96,22 @@ contract VioletID is
         unsetStatus(account, statusId);
         // TODO: Remove this event?
         emit RevokedStatus(account, statusId, reason);
+    }
+
+    function registerStatus(uint8 statusId, string calldata statusName) public override onlyRole(ADMIN_ROLE) {
+        if (bytes(statusIdToName[statusId]).length > 0) revert StatusAlreadyRegistered();
+
+        statusIdToName[statusId] = statusName;
+
+        emit StatusRegistered(statusId, statusName);
+    }
+
+    function updateStatusName(uint8 statusId, string calldata statusName) public override onlyRole(ADMIN_ROLE) {
+        if (bytes(statusIdToName[statusId]).length == 0) revert StatusNotYetRegistered();
+
+        statusIdToName[statusId] = statusName;
+
+        emit StatusNameUpdated(statusId, statusName);
     }
 
     // solhint-disable-next-line no-empty-blocks
