@@ -19,6 +19,15 @@ interface IVioletID {
 
     function hasStatuses(address account, uint256 statusCombinationId) external view returns (bool);
 
+    function claimStatuses(
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        uint256 expiry,
+        address account,
+        uint256 statusCombinationId
+    ) external;
+
     function grantStatus(address account, uint8 statusId) external;
 
     function grantStatuses(address account, uint256 statusCombinationId) external;
