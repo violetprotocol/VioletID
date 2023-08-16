@@ -135,6 +135,7 @@ export function shouldBehaveLikeVioletID(): void {
     });
   });
 
+  // TODO: To complete
   describe("claimStatuses", async function () {
     context("EOA target", async function () {
       it("with proper EAT should succeed", async function () {
@@ -163,7 +164,7 @@ export function shouldBehaveLikeVioletID(): void {
     });
   });
 
-  describe.skip("grantStatus", async function () {
+  describe("grantStatus", async function () {
     context("with registered status", async function () {
       beforeEach("register status", async function () {
         await expect(
@@ -182,7 +183,7 @@ export function shouldBehaveLikeVioletID(): void {
           expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
         });
 
-        it("twice should fail", async function () {
+        it("granting twice should have no adverse effect", async function () {
           await expect(
             this.violetID.connect(this.signers.admin).grantStatus(this.signers.user.address, Status.IS_INDIVIDUAL),
           ).to.not.be.reverted;
@@ -191,7 +192,7 @@ export function shouldBehaveLikeVioletID(): void {
 
           await expect(
             this.violetID.connect(this.signers.admin).grantStatus(this.signers.user.address, Status.IS_INDIVIDUAL),
-          ).to.be.revertedWith("account already granted status");
+          ).to.not.be.reverted;
 
           expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
         });
@@ -224,7 +225,7 @@ export function shouldBehaveLikeVioletID(): void {
           expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_INDIVIDUAL)).to.be.true;
         });
 
-        it("twice should fail", async function () {
+        it("granting twice should have no adverse effect", async function () {
           await expect(
             this.violetID.connect(this.signers.admin).grantStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
           ).to.not.be.reverted;
@@ -233,7 +234,7 @@ export function shouldBehaveLikeVioletID(): void {
 
           await expect(
             this.violetID.connect(this.signers.admin).grantStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
-          ).to.be.revertedWith("account already granted status");
+          ).to.not.be.reverted;
 
           expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_INDIVIDUAL)).to.be.true;
         });
@@ -256,27 +257,27 @@ export function shouldBehaveLikeVioletID(): void {
       });
     });
 
-    context("without registered token", async function () {
-      context("EOA target", async function () {
-        it("as admin should fail", async function () {
-          await expect(
-            this.violetID.connect(this.signers.admin).grantStatus(this.signers.user.address, Status.IS_INDIVIDUAL),
-          ).to.be.revertedWith("token type not registered");
+    // context("without registered token", async function () {
+    //   context("EOA target", async function () {
+    //     it("as admin should fail", async function () {
+    //       await expect(
+    //         this.violetID.connect(this.signers.admin).grantStatus(this.signers.user.address, Status.IS_INDIVIDUAL),
+    //       ).to.be.revertedWith("token type not registered");
 
-          expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.false;
-        });
-      });
+    //       expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.false;
+    //     });
+    //   });
 
-      context("Contract target", async function () {
-        it("as admin should fail", async function () {
-          await expect(
-            this.violetID.connect(this.signers.admin).grantStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
-          ).to.be.revertedWith("token type not registered");
+    //   context("Contract target", async function () {
+    //     it("as admin should fail", async function () {
+    //       await expect(
+    //         this.violetID.connect(this.signers.admin).grantStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
+    //       ).to.be.revertedWith("token type not registered");
 
-          expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_INDIVIDUAL)).to.be.false;
-        });
-      });
-    });
+    //       expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_INDIVIDUAL)).to.be.false;
+    //     });
+    //   });
+    // });
   });
 
   describe.skip("grantStatuses", async function () {
@@ -446,19 +447,19 @@ export function shouldBehaveLikeVioletID(): void {
       context("Contract holder", async function () {
         it("contract should have status", async function () {
           await expect(
-            this.violetID.connect(this.signers.admin).grantStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
+            this.violetID
+              .connect(this.signers.admin)
+              .grantStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET),
           ).to.not.be.reverted;
 
           expect(
-            await this.violetID.connect(this.signers.user).hasStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
+            await this.violetID
+              .connect(this.signers.user)
+              .hasStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET),
           ).to.be.true;
         });
 
         it("contract should not have status not granted", async function () {
-          expect(
-            await this.violetID.connect(this.signers.user).hasStatus(this.mockContract.address, Status.IS_BUSINESS),
-          ).to.be.false;
-
           expect(
             await this.violetID.connect(this.signers.user).hasStatus(this.mockContract.address, Status.IS_BUSINESS),
           ).to.be.false;

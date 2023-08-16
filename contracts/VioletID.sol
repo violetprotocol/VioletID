@@ -82,7 +82,8 @@ contract VioletID is
     }
 
     function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
-        if (hasStatus(account, statusId)) revert AccountAlreadyHasStatus(statusId);
+        if (bytes(statusIdToName[statusId]).length == 0) revert StatusNotYetRegistered();
+
         setStatus(account, statusId);
         // TODO: Remove this event?
         emit GrantedStatus(account, statusId);
@@ -93,7 +94,6 @@ contract VioletID is
     }
 
     function revokeStatus(address account, uint8 statusId, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
-        if (!hasStatus(account, statusId)) revert AccountDoesNotHaveStatus(statusId);
         unsetStatus(account, statusId);
         // TODO: Remove this event?
         emit RevokedStatus(account, statusId, reason);
