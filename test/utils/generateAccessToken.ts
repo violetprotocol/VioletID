@@ -4,14 +4,14 @@ import { BigNumber, Contract, Wallet } from "ethers";
 import { splitSignature } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { SimpleRegistry } from "../../src/types";
+import { VioletID } from "../../src/types";
 
 export const generateAccessToken = async (
   signer: SignerWithAddress,
   verifyingContract: Contract,
   functionSignature: string,
   caller: Wallet | SignerWithAddress,
-  contract: SimpleRegistry,
+  contract: VioletID,
   parameters: any[],
   expiry?: BigNumber,
 ) => {
