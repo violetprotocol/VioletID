@@ -28,8 +28,6 @@ const INDIVIDUAL_US_ACCREDITED_COMBINATION_ID = getStatusCombinationId([
 const OWNER_ROLE = utils.keccak256(toUtf8Bytes("OWNER_ROLE"));
 const ADMIN_ROLE = utils.keccak256(toUtf8Bytes("ADMIN_ROLE"));
 
-const FIRST_TOKEN_ID = 1;
-
 export function shouldBehaveLikeVioletID(): void {
   describe("grantRole", async function () {
     context("as owner", async function () {
@@ -281,8 +279,32 @@ export function shouldBehaveLikeVioletID(): void {
     // });
   });
 
-  describe.skip("grantStatuses", async function () {
-    // TODO
+  // TODO: To complete
+  describe("grantStatuses", async function () {
+    beforeEach("register statuses", async function () {
+      await expect(
+        this.violetID.connect(this.signers.admin).registerStatus(Status.IS_INDIVIDUAL, IS_INDIVIDUAL_STATUS_NAME),
+      ).to.not.be.reverted;
+
+      await expect(
+        this.violetID
+          .connect(this.signers.admin)
+          .registerStatus(Status.IS_US_ACCREDITED_INVESTOR, IS_US_ACCREDITED_INVESTOR_STATUS_NAME),
+      ).to.not.be.reverted;
+    });
+
+    it("as admin should succeed", async function () {
+      await expect(
+        this.violetID
+          .connect(this.signers.admin)
+          .grantStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID),
+      ).to.not.be.reverted;
+
+      expect(await this.violetID.hasStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID)).to.be
+        .true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+    });
   });
 
   describe("revokeStatus", async function () {
