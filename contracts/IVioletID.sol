@@ -2,24 +2,26 @@
 pragma solidity ^0.8.13;
 
 interface IVioletID {
-    event AttributeRegistered(uint8 attributeId, string attributeName);
-    event AttributeNameUpdated(uint8 attributeId, string attributeName);
-    event GrantedAttribute(uint256 tokenId, uint8 attributeId);
-    event RevokedAttribute(uint256 tokenId, uint8 attributeId, bytes reason);
+    event StatusRegistered(uint8 statusId, string statusName);
+    event StatusNameUpdated(uint8 statusId, string statusName);
+    event GrantedStatus(address account, uint8 statusId);
+    event RevokedStatus(address account, uint8 statusId, bytes reason);
 
-    function grantAttribute(uint256 tokenId, uint8 attributeId) external;
+    error AccountWithoutStatus(uint8 statusId);
 
-    function grantAttributes(uint256 tokenId, uint256 attributeCombinationId) external;
+    function statusIdToName(uint8 statusId) external view returns (string memory);
 
-    function revokeAttribute(uint256 tokenId, uint8 attributeId, bytes memory reason) external;
+    function hasStatus(address account, uint8 statusId) external view returns (bool);
 
-    function hasAttribute(uint256 tokenId, uint8 attributeId) external view returns (bool);
+    function hasStatuses(address account, uint256 statusCombinationId) external view returns (bool);
 
-    function hasAttributes(uint256 tokenId, uint256 attributeCombinationId) external view returns (bool);
+    function grantStatus(address account, uint8 statusId) external;
 
-    function attributeIdToName(uint8 attributeId) external view returns (string memory);
+    function grantStatuses(address account, uint256 statusCombinationId) external;
 
-    function registerAttribute(uint8 attributeId, string calldata attributeName) external;
+    function revokeStatus(address account, uint8 statusId, bytes memory reason) external;
 
-    function updateAttributeName(uint8 attributeId, string calldata attributeName) external;
+    function registerStatus(uint8 statusId, string calldata statusName) external;
+
+    function updateStatusName(uint8 statusId, string calldata statusName) external;
 }

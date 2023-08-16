@@ -9,32 +9,30 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "./IVioletID.sol";
-import "./AttributesMap.sol";
+import "./StatusMapByAddress.sol";
 import "./temp/AccessTokenConsumerUpgradeable.sol";
 
 contract VioletID is
     Initializable,
-    ERC1155Upgradeable,
     AccessControlUpgradeable,
     PausableUpgradeable,
-    ERC1155BurnableUpgradeable,
     UUPSUpgradeable,
     IVioletID,
-    AttributesMap,
+    StatusMapByAddress,
     AccessTokenConsumerUpgradeable
 {
     /// @notice Owner role for:
     ///     - Upgrading
     ///     - Pausing
     ///     - Role Managing
-    ///     - Setting URI
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
     /// @notice Admin role for:
-    ///     - Minting
-    ///     - Burning
+    ///     - Registering and updating statuses names
+    ///     - Granting statuses
+    ///     - Revoking statuses
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    uint256 public nextTokenId;
-    mapping(uint8 => string) public override attributeIdToName;
+    // User-friendly name for each status
+    mapping(uint8 => string) public override statusIdToName;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -42,10 +40,8 @@ contract VioletID is
     }
 
     function initialize(address _EATVerifier) public initializer {
-        __ERC1155_init("");
         __AccessControl_init();
         __Pausable_init();
-        __ERC1155Burnable_init();
         __UUPSUpgradeable_init();
         __AccessTokenConsumer_init(_EATVerifier);
 
@@ -55,12 +51,6 @@ contract VioletID is
         _setRoleAdmin(ADMIN_ROLE, OWNER_ROLE); // OWNER_ROLE can change ADMIN_ROLE
         _grantRole(OWNER_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
-        // Cheaper first mint
-        nextTokenId++;
-    }
-
-    function setURI(string memory newuri) public onlyRole(OWNER_ROLE) {
-        _setURI(newuri);
     }
 
     function pause() public onlyRole(OWNER_ROLE) {
@@ -71,118 +61,60 @@ contract VioletID is
         _unpause();
     }
 
-    function registerAttribute(uint8 attributeId, string calldata attributeName) public override onlyRole(ADMIN_ROLE) {
-        require(bytes(attributeIdToName[attributeId]).length == 0, "attribute already registered");
-
-        attributeIdToName[attributeId] = attributeName;
-        emit AttributeRegistered(attributeId, attributeName);
+    function hasStatus(address account, uint8 statusId) public view override returns (bool) {
+        return isStatusSet(account, statusId);
     }
 
-    function updateAttributeName(
-        uint8 attributeId,
-        string calldata attributeName
-    ) public override onlyRole(ADMIN_ROLE) {
-        require(bytes(attributeIdToName[attributeId]).length > 0, "attribute not registered");
-        attributeIdToName[attributeId] = attributeName;
-        emit AttributeNameUpdated(attributeId, attributeName);
+    function hasStatuses(address account, uint256 statusCombinationId) public view override returns (bool) {
+        return areStatusesSet(account, statusCombinationId);
     }
 
-    function grantAttribute(uint256 tokenId, uint8 attributeId) public override onlyRole(ADMIN_ROLE) {
-        require(!hasAttribute(tokenId, attributeId), "token already has this attribute");
-        setAttribute(tokenId, attributeId);
-        // TODO: Remove this event?
-        emit GrantedAttribute(tokenId, attributeId);
-    }
-
-    function grantAttributes(uint256 tokenId, uint256 attributeCombinationId) public override onlyRole(ADMIN_ROLE) {
-        setMultipleAttributes(tokenId, attributeCombinationId);
-    }
-
-    function revokeAttribute(
-        uint256 tokenId,
-        uint8 attributeId,
-        bytes memory reason
-    ) public override onlyRole(ADMIN_ROLE) {
-        require(hasAttribute(tokenId, attributeId), "token does not have this attribute");
-        unsetAttribute(tokenId, attributeId);
-        emit RevokedAttribute(tokenId, attributeId, reason);
-    }
-
-    function hasAttribute(uint256 tokenId, uint8 attributeId) public view override returns (bool) {
-        return isAttributeSet(tokenId, attributeId);
-    }
-
-    function hasAttributes(uint256 tokenId, uint256 attributeCombinationId) public view override returns (bool) {
-        return areAttributesSet(tokenId, attributeCombinationId);
-    }
-
-    function mintWithAttributes(address account, uint256 attributeCombinationId) public onlyRole(ADMIN_ROLE) {
-        _mint(account, nextTokenId, 1, toBytes(attributeCombinationId));
-        unchecked {
-            ++nextTokenId;
-        }
-    }
-
-    function claimTokenWithAttributes(
+    function claimStatuses(
         uint8 v,
         bytes32 r,
         bytes32 s,
         uint256 expiry,
-        uint256 attributeCombinationId
+        address account,
+        uint256 statusCombinationId
     ) public requiresAuth(v, r, s, expiry) {
-        _mint(msg.sender, nextTokenId, 1, toBytes(attributeCombinationId));
-        unchecked {
-            ++nextTokenId;
-        }
+        setMultipleStatuses(account, statusCombinationId);
     }
 
-    function safeTransferFrom(address, address, uint256, uint256, bytes memory) public virtual override {
-        revert("transfers disallowed");
+    function registerStatus(uint8 statusId, string calldata statusName) public override onlyRole(ADMIN_ROLE) {
+        require(bytes(statusIdToName[statusId]).length == 0, "status already registered");
+
+        statusIdToName[statusId] = statusName;
+        emit StatusRegistered(statusId, statusName);
     }
 
-    /**
-     * @dev See {IERC1155-safeBatchTransferFrom}.
-     */
-    function safeBatchTransferFrom(
-        address,
-        address,
-        uint256[] memory,
-        uint256[] memory,
-        bytes memory
-    ) public virtual override {
-        revert("transfers disallowed");
+    function updateStatusName(uint8 statusId, string calldata statusName) public override onlyRole(ADMIN_ROLE) {
+        require(bytes(statusIdToName[statusId]).length > 0, "status not registered");
+        statusIdToName[statusId] = statusName;
+        emit StatusNameUpdated(statusId, statusName);
     }
 
-    function _beforeTokenTransfer(
-        address operator,
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal override(ERC1155Upgradeable) whenNotPaused {
-        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
-
-        if (from == address(0) && data.length > 0) {
-            setMultipleAttributes(ids[0], uint256(bytes32(data)));
-        }
+    function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
+        require(!hasStatus(account, statusId), "token already has this status");
+        setStatus(account, statusId);
+        // TODO: Remove this event?
+        emit GrantedStatus(account, statusId);
     }
 
-    function toBytes(uint256 x) internal pure returns (bytes memory b) {
-        b = new bytes(32);
-        assembly {
-            mstore(add(b, 32), x)
-        }
+    function grantStatuses(address account, uint256 statusCombinationId) public override onlyRole(ADMIN_ROLE) {
+        setMultipleStatuses(account, statusCombinationId);
+    }
+
+    function revokeStatus(address account, uint8 statusId, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
+        if (!hasStatus(account, statusId)) revert AccountWithoutStatus(statusId);
+        unsetStatus(account, statusId);
+        emit RevokedStatus(account, statusId, reason);
     }
 
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(OWNER_ROLE) {}
 
     // The following functions are overrides required by Solidity.
-
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override(ERC1155Upgradeable, AccessControlUpgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override(AccessControlUpgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
