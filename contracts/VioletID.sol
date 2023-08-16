@@ -81,20 +81,23 @@ contract VioletID is
     }
 
     function registerStatus(uint8 statusId, string calldata statusName) public override onlyRole(ADMIN_ROLE) {
-        require(bytes(statusIdToName[statusId]).length == 0, "status already registered");
+        if (bytes(statusIdToName[statusId]).length > 0) revert StatusAlreadyRegistered();
 
         statusIdToName[statusId] = statusName;
+
         emit StatusRegistered(statusId, statusName);
     }
 
     function updateStatusName(uint8 statusId, string calldata statusName) public override onlyRole(ADMIN_ROLE) {
-        require(bytes(statusIdToName[statusId]).length > 0, "status not registered");
+        if (bytes(statusIdToName[statusId]).length == 0) revert StatusNotYetRegistered();
+
         statusIdToName[statusId] = statusName;
+
         emit StatusNameUpdated(statusId, statusName);
     }
 
     function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
-        require(!hasStatus(account, statusId), "token already has this status");
+        if (hasStatus(account, statusId)) revert AccountAlreadyHasStatus(statusId);
         setStatus(account, statusId);
         // TODO: Remove this event?
         emit GrantedStatus(account, statusId);
@@ -105,8 +108,9 @@ contract VioletID is
     }
 
     function revokeStatus(address account, uint8 statusId, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
-        if (!hasStatus(account, statusId)) revert AccountWithoutStatus(statusId);
+        if (!hasStatus(account, statusId)) revert AccountDoesNotHaveStatus(statusId);
         unsetStatus(account, statusId);
+        // TODO: Remove this event?
         emit RevokedStatus(account, statusId, reason);
     }
 

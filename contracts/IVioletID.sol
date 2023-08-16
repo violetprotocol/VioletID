@@ -7,7 +7,11 @@ interface IVioletID {
     event GrantedStatus(address account, uint8 statusId);
     event RevokedStatus(address account, uint8 statusId, bytes reason);
 
-    error AccountWithoutStatus(uint8 statusId);
+    // TODO: statusId not needed and cheaper without?
+    error AccountDoesNotHaveStatus(uint8 statusId);
+    error AccountAlreadyHasStatus(uint8 statusId);
+    error StatusAlreadyRegistered();
+    error StatusNotYetRegistered();
 
     function statusIdToName(uint8 statusId) external view returns (string memory);
 
