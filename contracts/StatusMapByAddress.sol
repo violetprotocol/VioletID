@@ -2,8 +2,8 @@
 pragma solidity ^0.8.9;
 
 /**
- * @dev Provides a mapping from an id to 256 bits, used as boolean 'flags' to represent different statuses,
- * each identified by an `index`.
+ * @dev Provides a mapping from an address to a 256-bit unsigned integer where each bit, identified by its `index`,
+ * is used as a boolean flag to represent a different "status".
  * Inspired by OpenZeppelin Contracts (utils/structs/BitMaps.sol)
  **/
 contract StatusMapByAddress {
