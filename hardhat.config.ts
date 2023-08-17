@@ -4,6 +4,7 @@ import "@nomiclabs/hardhat-etherscan";
 import "@openzeppelin/hardhat-upgrades";
 import { config as dotenvConfig } from "dotenv";
 import * as ethers from "ethers";
+import "hardhat-dependency-compiler";
 import "hardhat-gas-reporter";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
@@ -148,6 +149,9 @@ const config: HardhatUserConfig = {
         runs: 20000,
       },
     },
+  },
+  dependencyCompiler: {
+    paths: ["@violetprotocol/ethereum-access-token/contracts/AccessTokenVerifier.sol"],
   },
   typechain: {
     outDir: "src/types",
