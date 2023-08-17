@@ -2,16 +2,6 @@
 pragma solidity ^0.8.13;
 
 interface IVioletID {
-    event StatusRegistered(uint8 statusId, string statusName);
-    event StatusNameUpdated(uint8 statusId, string statusName);
-    event GrantedStatus(address account, uint8 statusId);
-    event RevokedStatus(address account, uint8 statusId, bytes reason);
-
-    error StatusAlreadyRegistered();
-    error StatusNotYetRegistered();
-
-    function statusIdToName(uint8 statusId) external view returns (string memory);
-
     function hasStatus(address account, uint8 statusId) external view returns (bool);
 
     function hasStatuses(address account, uint256 statusCombinationId) external view returns (bool);
@@ -29,9 +19,5 @@ interface IVioletID {
 
     function grantStatuses(address account, uint256 statusCombinationId) external;
 
-    function revokeStatus(address account, uint8 statusId, bytes memory reason) external;
-
-    function registerStatus(uint8 statusId, string calldata statusName) external;
-
-    function updateStatusName(uint8 statusId, string calldata statusName) external;
+    function revokeStatus(address account, uint8 statusId) external;
 }

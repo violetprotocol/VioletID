@@ -28,12 +28,9 @@ contract VioletID is
     ///     - Role Managing
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
     /// @notice Admin role for:
-    ///     - Registering and updating statuses names
     ///     - Granting statuses
     ///     - Revoking statuses
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    // User-friendly name for each status
-    mapping(uint8 => string) public override statusIdToName;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -82,37 +79,15 @@ contract VioletID is
     }
 
     function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
-        if (bytes(statusIdToName[statusId]).length == 0) revert StatusNotYetRegistered();
-
         setStatus(account, statusId);
-        // TODO: Remove this event?
-        emit GrantedStatus(account, statusId);
     }
 
     function grantStatuses(address account, uint256 statusCombinationId) public override onlyRole(ADMIN_ROLE) {
         setMultipleStatuses(account, statusCombinationId);
     }
 
-    function revokeStatus(address account, uint8 statusId, bytes memory reason) public override onlyRole(ADMIN_ROLE) {
+    function revokeStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
         unsetStatus(account, statusId);
-        // TODO: Remove this event?
-        emit RevokedStatus(account, statusId, reason);
-    }
-
-    function registerStatus(uint8 statusId, string calldata statusName) public override onlyRole(ADMIN_ROLE) {
-        if (bytes(statusIdToName[statusId]).length > 0) revert StatusAlreadyRegistered();
-
-        statusIdToName[statusId] = statusName;
-
-        emit StatusRegistered(statusId, statusName);
-    }
-
-    function updateStatusName(uint8 statusId, string calldata statusName) public override onlyRole(ADMIN_ROLE) {
-        if (bytes(statusIdToName[statusId]).length == 0) revert StatusNotYetRegistered();
-
-        statusIdToName[statusId] = statusName;
-
-        emit StatusNameUpdated(statusId, statusName);
     }
 
     // solhint-disable-next-line no-empty-blocks
