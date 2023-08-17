@@ -19,7 +19,7 @@ contract VioletID is
     PausableUpgradeable,
     UUPSUpgradeable,
     IVioletID,
-    StatusMapByAddress,
+    StatusMap,
     AccessTokenConsumerUpgradeable
 {
     /// @notice Owner role for:
