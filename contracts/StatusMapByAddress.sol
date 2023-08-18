@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.20;
 
 /**
  * @dev Provides a mapping from an address to a 256-bit unsigned integer where each bit, identified by its `index`,
