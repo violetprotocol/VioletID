@@ -20,7 +20,7 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
-    "@openzeppelin/hardhat-upgrades": "^1.22.1",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
     "@trivago/prettier-plugin-sort-imports": "^4.0.0",
     "@typechain/ethers-v5": "^10.2.1",
     "@typechain/hardhat": "^6.1.6",
@@ -98,7 +98,7 @@
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
   },
   "dependencies": {
-    "@openzeppelin/contracts-upgradeable": "^4.8.1",
+    "@openzeppelin/contracts-upgradeable": "^4.9.3",
     "hardhat-dependency-compiler": "^1.1.3"
   }
 }
