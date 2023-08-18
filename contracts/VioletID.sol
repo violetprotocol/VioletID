@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "./IVioletID.sol";
-import "./StatusMapByAddress.sol";
+import "./StatusMap.sol";
 import "./temp/AccessTokenConsumerUpgradeable.sol";
 
 contract VioletID is
