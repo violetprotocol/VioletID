@@ -60,6 +60,9 @@ contract StatusMap {
         statusesByAccount[account] &= ~mask;
     }
 
+    /**
+     * @dev Calculates the list of `statuses` given a `statusCombinationId`.
+     */
     function getStatusesFromCombinationId(uint256 statusCombinationId) external pure returns (uint8[] memory statuses) {
         bool isCollecting;
         do {
@@ -81,6 +84,9 @@ contract StatusMap {
         } while (!isCollecting);
     }
 
+    /**
+     * @dev Calculates the `statusCombinationId` given a list of `statuses`.
+     */
     function getStatusCombinationId(uint8[] calldata statusIds) external pure returns (uint256 statusCombinationId) {
         for (uint256 i = 0; i < statusIds.length; i++) {
             uint256 status = 1 << statusIds[i];
