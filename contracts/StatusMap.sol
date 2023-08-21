@@ -67,7 +67,7 @@ contract StatusMap {
             uint256 numberOfStatuses;
             uint256 currentStatusCombinationId = statusCombinationId;
 
-            for (uint8 i = 0; i < 256 && currentStatusCombinationId > 0; ) {
+            for (uint8 i = 0; i < 256 && currentStatusCombinationId > 0; i++) {
                 uint256 currentBit = 1 << i;
                 if (statusCombinationId & currentBit != 0) {
                     if (!isCollecting) {
@@ -79,8 +79,6 @@ contract StatusMap {
 
                     currentStatusCombinationId -= currentBit;
                 }
-
-                ++i;
             }
 
             if (!isCollecting) statuses = new uint8[](numberOfStatuses);
@@ -88,10 +86,9 @@ contract StatusMap {
     }
 
     function getStatusCombinationId(uint8[] calldata statusIds) external pure returns (uint256 statusCombinationId) {
-        for (uint256 i = 0; i < statusIds.length; ) {
+        for (uint256 i = 0; i < statusIds.length; i++) {
             uint256 status = 1 << statusIds[i];
             statusCombinationId += status;
-            ++i;
         }
     }
 }

@@ -366,8 +366,6 @@ export function shouldBehaveLikeVioletID(): void {
   describe.only("Conversion functions", async () => {
     const statuses = [1, 3, 6, 4];
 
-    console.log(getStatusCombinationId(statuses));
-
     describe("getStatusesFromCombinationId", async function () {
       it("should return the correct status combination id from list of statuses", async function () {
         const combinationId = getStatusCombinationId(statuses);
