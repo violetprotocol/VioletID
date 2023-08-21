@@ -364,21 +364,31 @@ export function shouldBehaveLikeVioletID(): void {
   });
 
   describe("Conversion functions", async () => {
-    const statuses = [1, 3, 6, 4];
+    const statuses = [
+      [1, 3, 6, 4],
+      [2, 3, 5, 7],
+      [1, 2, 3, 5, 6],
+      [4, 5, 6, 7, 8],
+      [1, 2, 3, 4, 5, 6, 7],
+    ];
 
     describe("getStatusesFromCombinationId", async function () {
       it("should return the correct status combination id from list of statuses", async function () {
-        const combinationId = getStatusCombinationId(statuses);
-        expect(await this.violetID.callStatic.getStatusesFromCombinationId(combinationId)).to.deep.equal(
-          statuses.sort(),
-        );
+        statuses.forEach(async (status) => {
+          const combinationId = getStatusCombinationId(status);
+          expect(await this.violetID.callStatic.getStatusesFromCombinationId(combinationId)).to.deep.equal(
+            statuses.sort(),
+          );
+        });
       });
     });
 
     describe("getStatusCombinationId", async function () {
       it("should return the correct statuses from a combination id", async function () {
-        const combinationId = getStatusCombinationId(statuses);
-        expect(await this.violetID.callStatic.getStatusCombinationId(statuses)).to.equal(combinationId);
+        statuses.forEach(async (status) => {
+          const combinationId = getStatusCombinationId(status);
+          expect(await this.violetID.callStatic.getStatusCombinationId(status)).to.equal(combinationId);
+        });
       });
     });
   });
