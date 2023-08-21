@@ -70,13 +70,9 @@ contract StatusMap {
             for (uint8 i = 0; i < 256 && currentStatusCombinationId > 0; i++) {
                 uint256 currentBit = 1 << i;
                 if (statusCombinationId & currentBit != 0) {
-                    if (!isCollecting) {
-                        numberOfStatuses += 1;
-                    } else {
-                        statuses[numberOfStatuses] = i;
-                        numberOfStatuses += 1;
-                    }
+                    if (isCollecting) statuses[numberOfStatuses] = i;
 
+                    numberOfStatuses += 1;
                     currentStatusCombinationId -= currentBit;
                 }
             }
