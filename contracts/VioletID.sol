@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// TODO: Update to 0.8.20
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -35,11 +34,11 @@ contract VioletID is
         _disableInitializers();
     }
 
-    function initialize(address _EATVerifier) public initializer {
+    function initialize(address _eatVerifier) public initializer {
         __AccessControl_init();
         __Pausable_init();
         __UUPSUpgradeable_init();
-        __AccessTokenConsumer_init(_EATVerifier);
+        __AccessTokenConsumer_init(_eatVerifier);
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
