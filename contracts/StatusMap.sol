@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "hardhat/console.sol";
+
 /**
  * @dev Provides a mapping from an address to a 256-bit unsigned integer where each bit, identified by its `index`,
  * is used as a boolean flag to represent a different "status".
@@ -56,5 +58,40 @@ contract StatusMap {
     function unsetStatus(address account, uint256 index) internal {
         uint256 mask = 1 << index;
         statusesByAccount[account] &= ~mask;
+    }
+
+    function getStatusesFromCombinationId(uint256 statusCombinationId) external pure returns (uint8[] memory statuses) {
+        bool isCollecting;
+        do {
+            isCollecting = statuses.length != 0;
+            uint256 numberOfStatuses;
+            uint256 currentStatusCombinationId = statusCombinationId;
+
+            for (uint8 i = 0; i < 256 && currentStatusCombinationId > 0; ) {
+                uint256 currentBit = 1 << i;
+                if (statusCombinationId & currentBit != 0) {
+                    if (!isCollecting) {
+                        numberOfStatuses += 1;
+                    } else {
+                        statuses[numberOfStatuses] = i;
+                        numberOfStatuses += 1;
+                    }
+
+                    currentStatusCombinationId -= currentBit;
+                }
+
+                ++i;
+            }
+
+            if (!isCollecting) statuses = new uint8[](numberOfStatuses);
+        } while (!isCollecting);
+    }
+
+    function getStatusCombinationId(uint8[] calldata statusIds) external pure returns (uint256 statusCombinationId) {
+        for (uint256 i = 0; i < statusIds.length; ) {
+            uint256 status = 1 << statusIds[i];
+            statusCombinationId += status;
+            ++i;
+        }
     }
 }
