@@ -1,21 +1,23 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 interface IVioletID {
-    event TokenTypeRegistered(uint256 tokenId, string tokenName);
-    event TokenTypeUpdated(uint256 tokenId, string tokenName);
-    event GrantedStatus(address account, uint256 tokenId);
-    event RevokedStatus(address account, uint256 tokenId, bytes reason);
+    function hasStatus(address account, uint8 statusId) external view returns (bool);
 
-    function grantStatus(address account, uint256 tokenId, bytes memory data) external;
+    function hasStatuses(address account, uint256 statusCombinationId) external view returns (bool);
 
-    function revokeStatus(address account, uint256 tokenId, bytes memory reason) external;
+    function claimStatuses(
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        uint256 expiry,
+        address account,
+        uint256 statusCombinationId
+    ) external;
 
-    function hasStatus(address account, uint256 tokenId) external view returns (bool);
+    function grantStatus(address account, uint8 statusId) external;
 
-    function tokenIdToName(uint256 tokenId) external view returns (string memory);
+    function grantStatuses(address account, uint256 statusCombinationId) external;
 
-    function registerTokenType(uint256 tokenId, string calldata tokenName) external;
-
-    function updateTokenTypeName(uint256 tokenId, string calldata tokenName) external;
+    function revokeStatus(address account, uint8 statusId) external;
 }

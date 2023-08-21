@@ -4,6 +4,7 @@ import "@nomiclabs/hardhat-etherscan";
 import "@openzeppelin/hardhat-upgrades";
 import { config as dotenvConfig } from "dotenv";
 import * as ethers from "ethers";
+import "hardhat-dependency-compiler";
 import "hardhat-gas-reporter";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
@@ -85,7 +86,7 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   gasReporter: {
     currency: "USD",
-    enabled: process.env.REPORT_GAS ? true : false,
+    enabled: true,
     excludeContracts: [],
     src: "./contracts",
   },
@@ -134,7 +135,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.13",
+    version: "0.8.20",
     settings: {
       metadata: {
         // Not including the metadata hash
@@ -145,9 +146,12 @@ const config: HardhatUserConfig = {
       // https://hardhat.org/hardhat-network/#solidity-optimizer-support
       optimizer: {
         enabled: true,
-        runs: 800,
+        runs: 20000,
       },
     },
+  },
+  dependencyCompiler: {
+    paths: ["@violetprotocol/ethereum-access-token/contracts/AccessTokenVerifier.sol"],
   },
   typechain: {
     outDir: "src/types",

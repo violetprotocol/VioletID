@@ -1,10 +1,22 @@
 import { expect } from "chai";
 import { utils } from "ethers";
 import { toUtf8Bytes } from "ethers/lib/utils";
-import { ethers } from "hardhat";
 
-const MAUVE_VERIFIED_ENTITY_STATUS_TOKENID = 0;
-const MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME = "MAUVE_VERIFIED_ENTITY_STATUS";
+import { generateAccessToken } from "../utils/generateAccessToken";
+import { getStatusCombinationId } from "../utils/getStatusCombinationId";
+
+enum Status {
+  REGISTERED_WITH_VIOLET = 1,
+  IS_INDIVIDUAL = 2,
+  IS_BUSINESS = 3,
+  IS_US_ACCREDITED_INVESTOR = 4,
+  IS_US = 5,
+}
+
+const INDIVIDUAL_US_ACCREDITED_COMBINATION_ID = getStatusCombinationId([
+  Status.IS_INDIVIDUAL,
+  Status.IS_US_ACCREDITED_INVESTOR,
+]);
 
 const OWNER_ROLE = utils.keccak256(toUtf8Bytes("OWNER_ROLE"));
 const ADMIN_ROLE = utils.keccak256(toUtf8Bytes("ADMIN_ROLE"));
@@ -44,665 +56,310 @@ export function shouldBehaveLikeVioletID(): void {
     });
   });
 
-  describe("registerTokenType", async function () {
-    it("as admin should succeed", async function () {
-      await expect(
-        this.violetID
-          .connect(this.signers.admin)
-          .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
-      )
-        .to.emit(this.violetID, "TokenTypeRegistered")
-        .withArgs(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME);
+  // TODO: To complete
+  describe("claimStatuses", async function () {
+    context("EOA target", async function () {
+      it("with proper EAT should succeed", async function () {
+        const claimStatusesFunctionSignature = "claimStatuses(uint8,bytes32,bytes32,uint256,address,uint256)";
 
-      expect(await this.violetID.callStatic.tokenIdToName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(
-        MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME,
-      );
-    });
-
-    it("as non admin should fail", async function () {
-      await expect(
-        this.violetID
-          .connect(this.signers.owner)
-          .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
-      ).to.be.revertedWith(
-        `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role 0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775`,
-      );
-
-      expect(await this.violetID.callStatic.tokenIdToName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal("");
-    });
-
-    context("with registered token", async function () {
-      beforeEach("register token", async function () {
-        await expect(
-          this.violetID
-            .connect(this.signers.admin)
-            .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
-        ).to.not.be.reverted;
-      });
-
-      it("as admin should fail", async function () {
-        await expect(
-          this.violetID
-            .connect(this.signers.admin)
-            .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
-        ).to.be.revertedWith("token type already exists");
-      });
-    });
-  });
-
-  describe("updateTokenTypeName", async function () {
-    it("as admin should fail without registered token", async function () {
-      await expect(
-        this.violetID
-          .connect(this.signers.admin)
-          .updateTokenTypeName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
-      ).to.be.revertedWith("token type not registered");
-    });
-
-    context("with registered token", async function () {
-      beforeEach("register token", async function () {
-        await expect(
-          this.violetID
-            .connect(this.signers.admin)
-            .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
-        ).to.not.be.reverted;
-      });
-
-      it("as admin should succeed", async function () {
-        const newTokenTypeName = "new name";
-        await expect(
-          this.violetID
-            .connect(this.signers.admin)
-            .updateTokenTypeName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, newTokenTypeName),
-        )
-          .to.emit(this.violetID, "TokenTypeUpdated")
-          .withArgs(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, newTokenTypeName);
-
-        expect(await this.violetID.callStatic.tokenIdToName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(
-          newTokenTypeName,
+        const { eat, expiry } = await generateAccessToken(
+          this.signers.owner,
+          this.eatVerifier,
+          claimStatusesFunctionSignature,
+          this.signers.user,
+          this.violetID,
+          [this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID],
         );
-      });
+        const { v, r, s } = eat;
 
-      it("as non admin should fail", async function () {
-        await expect(
-          this.violetID
-            .connect(this.signers.owner)
-            .updateTokenTypeName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "anything"),
-        ).to.be.revertedWith(
-          `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role 0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775`,
-        );
+        await this.violetID
+          .connect(this.signers.user)
+          .claimStatuses(v, r, s, expiry, this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID);
 
-        expect(await this.violetID.callStatic.tokenIdToName(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.equal(
-          MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME,
-        );
+        expect(
+          await this.violetID.hasStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID),
+        ).to.be.true;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
       });
     });
   });
 
   describe("grantStatus", async function () {
-    context("with registered token", async function () {
-      beforeEach("register token", async function () {
+    context("EOA target", async function () {
+      it("as admin should succeed", async function () {
         await expect(
-          this.violetID
-            .connect(this.signers.admin)
-            .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
+          this.violetID.connect(this.signers.admin).grantStatus(this.signers.user.address, Status.IS_INDIVIDUAL),
         ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
       });
 
-      context("EOA target", async function () {
-        it("as admin should succeed", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          )
-            .to.emit(this.violetID, "GrantedStatus")
-            .withArgs(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
+      it("granting twice should have no adverse effect", async function () {
+        await expect(
+          this.violetID.connect(this.signers.admin).grantStatus(this.signers.user.address, Status.IS_INDIVIDUAL),
+        ).to.not.be.reverted;
 
-          expect(
-            await this.violetID.hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-        });
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
 
-        it("twice should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
+        await expect(
+          this.violetID.connect(this.signers.admin).grantStatus(this.signers.user.address, Status.IS_INDIVIDUAL),
+        ).to.not.be.reverted;
 
-          expect(
-            await this.violetID.hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith("account already granted status");
-
-          expect(
-            await this.violetID.hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-        });
-
-        it("as owner should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.owner)
-              .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith(
-            `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
-          );
-        });
-
-        it("as user should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.user)
-              .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith(
-            `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
-          );
-        });
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
       });
 
-      context("Contract target", async function () {
-        it("as admin should succeed", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          )
-            .to.emit(this.violetID, "GrantedStatus")
-            .withArgs(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID);
+      it("as owner should fail", async function () {
+        await expect(
+          this.violetID.connect(this.signers.owner).grantStatus(this.signers.user.address, Status.IS_INDIVIDUAL),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
+      });
 
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-        });
-
-        it("twice should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith("account already granted status");
-
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-        });
-
-        it("as owner should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.owner)
-              .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith(
-            `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
-          );
-        });
-
-        it("as user should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.user)
-              .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith(
-            `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
-          );
-        });
+      it("as user should fail", async function () {
+        await expect(
+          this.violetID.connect(this.signers.user).grantStatus(this.signers.user.address, Status.IS_INDIVIDUAL),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
       });
     });
 
-    context("without registered token", async function () {
-      context("EOA target", async function () {
-        it("as admin should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith("token type not registered");
+    context("Contract target", async function () {
+      it("as admin should succeed", async function () {
+        await expect(
+          this.violetID.connect(this.signers.admin).grantStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
+        ).to.not.be.reverted;
 
-          expect(
-            await this.violetID.hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-        });
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_INDIVIDUAL)).to.be.true;
       });
 
-      context("Contract target", async function () {
-        it("as admin should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith("token type not registered");
+      it("granting twice should have no adverse effect", async function () {
+        await expect(
+          this.violetID.connect(this.signers.admin).grantStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
+        ).to.not.be.reverted;
 
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-        });
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_INDIVIDUAL)).to.be.true;
+
+        await expect(
+          this.violetID.connect(this.signers.admin).grantStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_INDIVIDUAL)).to.be.true;
       });
+
+      it("as owner should fail", async function () {
+        await expect(
+          this.violetID.connect(this.signers.owner).grantStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
+      });
+
+      it("as user should fail", async function () {
+        await expect(
+          this.violetID.connect(this.signers.user).grantStatus(this.mockContract.address, Status.IS_INDIVIDUAL),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
+      });
+    });
+  });
+
+  // TODO: To complete
+  describe("grantStatuses", async function () {
+    it("as admin should succeed", async function () {
+      await expect(
+        this.violetID
+          .connect(this.signers.admin)
+          .grantStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID),
+      ).to.not.be.reverted;
+
+      expect(await this.violetID.hasStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID)).to.be
+        .true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
     });
   });
 
   describe("revokeStatus", async function () {
-    context("with registered token", async function () {
-      beforeEach("register token", async function () {
+    context("EOA target", async function () {
+      beforeEach("grantStatus", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
+            .grantStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
       });
 
-      context("EOA target", async function () {
-        beforeEach("grantStatus", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-        });
+      it("as admin should succeed", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.not.be.reverted;
 
-        it("as admin should succeed", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .revokeStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-
-          expect(
-            await this.violetID.hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-        });
-
-        it("as admin should emit event", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .revokeStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          )
-            .to.emit(this.violetID, "RevokedStatus")
-            .withArgs(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00");
-
-          expect(
-            await this.violetID.hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-        });
-
-        it("as owner should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.owner)
-              .revokeStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith(
-            `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
-          );
-
-          expect(
-            await this.violetID.hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-        });
-
-        it("as user should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.user)
-              .revokeStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith(
-            `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
-          );
-
-          expect(
-            await this.violetID.hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-        });
-
-        it("already unregistered account should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .revokeStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-
-          expect(
-            await this.violetID.hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .revokeStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith("account not in revocable status");
-        });
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
       });
 
-      context("Contract target", async function () {
-        beforeEach("grantStatus", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-        });
+      it("as owner should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.owner)
+            .revokeStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
 
-        it("as admin should succeed", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .revokeStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+      });
 
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-        });
+      it("as user should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.user)
+            .revokeStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
 
-        it("as admin should emit event", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .revokeStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          )
-            .to.emit(this.violetID, "RevokedStatus")
-            .withArgs(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00");
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+      });
 
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-        });
+      it("revoking twice should have no adverse effect", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.not.be.reverted;
 
-        it("as owner should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.owner)
-              .revokeStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith(
-            `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
-          );
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
 
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-        });
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.not.be.reverted;
 
-        it("as user should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.user)
-              .revokeStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith(
-            `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
-          );
-
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-        });
-
-        it("already unregistered account should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .revokeStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .revokeStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.be.revertedWith("account not in revocable status");
-        });
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
       });
     });
-  });
 
-  describe("safeTransferFrom", async function () {
-    context("with registered token", async function () {
-      beforeEach("register token", async function () {
+    context("Contract target", async function () {
+      beforeEach("grantStatus", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
+            .grantStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
       });
 
-      context("EOA holder", async function () {
-        beforeEach("grantStatus", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-        });
-
-        it("to EOA should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.user)
-              .safeTransferFrom(
-                this.signers.user.address,
-                this.signers.admin.address,
-                MAUVE_VERIFIED_ENTITY_STATUS_TOKENID,
-                1,
-                "0x00",
-              ),
-          ).to.be.revertedWith(`transfers disallowed`);
-
-          expect(
-            await this.violetID.hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-          expect(
-            await this.violetID.hasStatus(this.signers.admin.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-        });
-
-        it("to Contract should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.user)
-              .safeTransferFrom(
-                this.signers.user.address,
-                this.mockContract.address,
-                MAUVE_VERIFIED_ENTITY_STATUS_TOKENID,
-                1,
-                "0x00",
-              ),
-          ).to.be.revertedWith(`transfers disallowed`);
-        });
-      });
-
-      context("Contract holder", async function () {
-        beforeEach("grantStatus", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-        });
-
-        it("to EOA should fail", async function () {
-          await expect(this.mockContract.transferVID(this.signers.user.address)).to.be.revertedWith(
-            `transfers disallowed`,
-          );
-        });
-
-        it("to Contract should fail", async function () {
-          const anotherMock = await (await ethers.getContractFactory("MockContract")).deploy(this.violetID.address);
-          await expect(this.mockContract.transferVID(anotherMock.address)).to.be.revertedWith(`transfers disallowed`);
-
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-          expect(await this.violetID.hasStatus(anotherMock.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.be.false;
-        });
-      });
-    });
-  });
-
-  describe("safeBatchTransferFrom", async function () {
-    context("with registered token", async function () {
-      beforeEach("register token", async function () {
+      it("as admin should succeed", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
+            .revokeStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
       });
 
-      context("EOA holder", async function () {
-        beforeEach("grantStatus", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-        });
+      it("as owner should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.owner)
+            .revokeStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
 
-        it("to EOA should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.user)
-              .safeBatchTransferFrom(
-                this.signers.user.address,
-                this.signers.admin.address,
-                [MAUVE_VERIFIED_ENTITY_STATUS_TOKENID],
-                [1],
-                "0x00",
-              ),
-          ).to.be.revertedWith(`transfers disallowed`);
-        });
-
-        it("to Contract should fail", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.user)
-              .safeBatchTransferFrom(
-                this.signers.user.address,
-                this.mockContract.address,
-                [MAUVE_VERIFIED_ENTITY_STATUS_TOKENID],
-                [1],
-                "0x00",
-              ),
-          ).to.be.revertedWith(`transfers disallowed`);
-        });
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
       });
 
-      context("Contract holder", async function () {
-        beforeEach("grantStatus", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-        });
+      it("as user should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.user)
+            .revokeStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
 
-        it("to EOA should fail", async function () {
-          await expect(this.mockContract.transferVIDBatch(this.signers.user.address)).to.be.revertedWith(
-            `transfers disallowed`,
-          );
-        });
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+      });
 
-        it("to Contract should fail", async function () {
-          const anotherMock = await (await ethers.getContractFactory("MockContract")).deploy(this.violetID.address);
-          await expect(this.mockContract.transferVIDBatch(anotherMock.address)).to.be.revertedWith(
-            `transfers disallowed`,
-          );
+      it("revoking twice should have no adverse effect", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.not.be.reverted;
 
-          expect(
-            await this.violetID.hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-          expect(await this.violetID.hasStatus(anotherMock.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID)).to.be.false;
-        });
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.not.be.reverted;
       });
     });
   });
 
   describe("hasStatus", async function () {
-    context("with registered token", async function () {
-      beforeEach("register token", async function () {
+    context("EOA holder", async function () {
+      it("user should have status", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .registerTokenType(MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, MAUVE_VERIFIED_ENTITY_STATUS_TOKEN_NAME),
+            .grantStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
         ).to.not.be.reverted;
+
+        expect(
+          await this.violetID
+            .connect(this.signers.user)
+            .hasStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
+        ).to.be.true;
       });
 
-      context("EOA holder", async function () {
-        it("user should have status", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-
-          expect(
-            await this.violetID
-              .connect(this.signers.user)
-              .hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-        });
-
-        it("user should not have status", async function () {
-          await expect(
-            this.violetID.connect(this.signers.admin).grantStatus(this.signers.user.address, 42, "0x00"),
-          ).to.be.revertedWith("token type not registered");
-
-          expect(
-            await this.violetID
-              .connect(this.signers.user)
-              .hasStatus(this.signers.user.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-
-          expect(await this.violetID.connect(this.signers.user).hasStatus(this.signers.user.address, 42)).to.be.false;
-        });
-      });
-
-      context("Contract holder", async function () {
-        it("contract should have status", async function () {
-          await expect(
-            this.violetID
-              .connect(this.signers.admin)
-              .grantStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID, "0x00"),
-          ).to.not.be.reverted;
-
-          expect(
-            await this.violetID
-              .connect(this.signers.user)
-              .hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.true;
-        });
-
-        it("contract should not have status", async function () {
-          await expect(
-            this.violetID.connect(this.signers.admin).grantStatus(this.mockContract.address, 42, "0x00"),
-          ).to.be.revertedWith("token type not registered");
-
-          expect(
-            await this.violetID
-              .connect(this.signers.user)
-              .hasStatus(this.mockContract.address, MAUVE_VERIFIED_ENTITY_STATUS_TOKENID),
-          ).to.be.false;
-
-          expect(await this.violetID.connect(this.signers.user).hasStatus(this.mockContract.address, 42)).to.be.false;
-        });
+      it("user should not have a status not granted", async function () {
+        expect(
+          await this.violetID
+            .connect(this.signers.user)
+            .hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.be.false;
       });
     });
+
+    context("Contract holder", async function () {
+      it("contract should have status", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .grantStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET),
+        ).to.not.be.reverted;
+
+        expect(
+          await this.violetID
+            .connect(this.signers.user)
+            .hasStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET),
+        ).to.be.true;
+      });
+
+      it("contract should not have status not granted", async function () {
+        expect(
+          await this.violetID.connect(this.signers.user).hasStatus(this.mockContract.address, Status.IS_BUSINESS),
+        ).to.be.false;
+      });
+    });
+  });
+
+  describe.skip("hasStatuses", async function () {
+    // TODO
   });
 }

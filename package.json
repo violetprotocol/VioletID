@@ -19,10 +19,10 @@
     "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
-    "@nomiclabs/hardhat-etherscan": "^3.1.2",
-    "@openzeppelin/hardhat-upgrades": "^1.22.1",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
     "@trivago/prettier-plugin-sort-imports": "^4.0.0",
-    "@typechain/ethers-v5": "^10.1.1",
+    "@typechain/ethers-v5": "^10.2.1",
     "@typechain/hardhat": "^6.1.6",
     "@types/chai": "^4.3.4",
     "@types/fs-extra": "^9.0.13",
@@ -30,6 +30,8 @@
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^5.44.0",
     "@typescript-eslint/parser": "^5.44.0",
+    "@violetprotocol/ethereum-access-token": "0.3.0",
+    "@violetprotocol/ethereum-access-token-helpers": "^0.2.0",
     "chai": "^4.3.7",
     "commitizen": "^4.2.5",
     "cross-env": "^7.0.3",
@@ -39,7 +41,7 @@
     "eslint-config-prettier": "^8.5.0",
     "ethers": "^5.7.2",
     "fs-extra": "^10.1.0",
-    "hardhat": "^2.16.1",
+    "hardhat": "^2.17.1",
     "hardhat-gas-reporter": "^1.0.9",
     "husky": "^8.0.2",
     "lint-staged": "^13.0.4",
@@ -54,7 +56,7 @@
     "solidity-coverage": "^0.8.3",
     "ts-generator": "^0.1.1",
     "ts-node": "^10.9.1",
-    "typechain": "^8.1.1",
+    "typechain": "^8.3.1",
     "typescript": "^4.9.3"
   },
   "files": [
@@ -96,6 +98,7 @@
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
   },
   "dependencies": {
-    "@openzeppelin/contracts-upgradeable": "^4.8.1"
+    "@openzeppelin/contracts-upgradeable": "^4.9.3",
+    "hardhat-dependency-compiler": "^1.1.3"
   }
 }
