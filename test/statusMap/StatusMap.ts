@@ -3,10 +3,10 @@ import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signe
 import { ethers } from "hardhat";
 
 import type { Signers } from "../types";
-import { shouldBehaveLikeVioletID } from "./VID.behavior";
-import { deployVioletIDFixture } from "./VID.fixture";
+import { shouldBehaveLikeStatusMap } from "./StatusMap.behavior";
+import { deployStatusMapFixture } from "./StatusMap.fixture";
 
-describe("VioletID Unit tests", function () {
+describe("StatusMap Unit tests", function () {
   before(async function () {
     this.signers = {} as Signers;
 
@@ -18,14 +18,12 @@ describe("VioletID Unit tests", function () {
     this.loadFixture = loadFixture;
   });
 
-  describe("VioletID", function () {
+  describe("StatusMap", function () {
     beforeEach(async function () {
-      const { violetID, mockVIDReceiver, eatVerifier } = await this.loadFixture(deployVioletIDFixture);
-      this.violetID = violetID;
-      this.mockVIDReceiver = mockVIDReceiver;
-      this.eatVerifier = eatVerifier;
+      const { statusMap } = await this.loadFixture(deployStatusMapFixture);
+      this.statusMap = statusMap;
     });
 
-    shouldBehaveLikeVioletID();
+    shouldBehaveLikeStatusMap();
   });
 });

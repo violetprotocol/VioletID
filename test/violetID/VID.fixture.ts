@@ -1,12 +1,18 @@
 import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { ethers, upgrades } from "hardhat";
 
-import { AccessTokenVerifier, MockContract, MockContract__factory, VioletID, VioletID__factory } from "../../src/types";
+import {
+  AccessTokenVerifier,
+  MockVioletIDReceiver,
+  MockVioletIDReceiver__factory,
+  VioletID,
+  VioletID__factory,
+} from "../../src/types";
 import { eatVerifierFixture } from "../fixtures/eatVerifierFixtures";
 
 export async function deployVioletIDFixture(): Promise<{
   violetID: VioletID;
-  mockContract: MockContract;
+  mockVIDReceiver: MockVioletIDReceiver;
   eatVerifier: AccessTokenVerifier;
 }> {
   const signers: SignerWithAddress[] = await ethers.getSigners();
@@ -24,11 +30,13 @@ export async function deployVioletIDFixture(): Promise<{
   await violetID.connect(owner).grantRole(await violetID.callStatic.ADMIN_ROLE(), admin.address);
   await violetID.connect(owner).revokeRole(await violetID.callStatic.ADMIN_ROLE(), owner.address);
 
-  const MockContractFactory: MockContract__factory = <MockContract__factory>(
-    await ethers.getContractFactory("MockContract")
+  const MockVIDReceiverFactory: MockVioletIDReceiver__factory = <MockVioletIDReceiver__factory>(
+    await ethers.getContractFactory("MockVioletIDReceiver")
   );
-  const mockContract: MockContract = <MockContract>await MockContractFactory.deploy(violetID.address);
-  await mockContract.deployed();
+  const mockVIDReceiver: MockVioletIDReceiver = <MockVioletIDReceiver>(
+    await MockVIDReceiverFactory.deploy(violetID.address)
+  );
+  await mockVIDReceiver.deployed();
 
-  return { violetID, mockContract, eatVerifier };
+  return { violetID, mockVIDReceiver, eatVerifier };
 }
