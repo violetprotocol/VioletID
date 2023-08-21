@@ -57,11 +57,11 @@ contract VioletID is
     }
 
     function hasStatus(address account, uint8 statusId) public view override returns (bool) {
-        return isStatusSet(account, statusId);
+        return _isStatusSet(account, statusId);
     }
 
     function hasStatuses(address account, uint256 statusCombinationId) public view override returns (bool) {
-        return areStatusesSet(account, statusCombinationId);
+        return _areStatusesSet(account, statusCombinationId);
     }
 
     function claimStatuses(
@@ -72,19 +72,19 @@ contract VioletID is
         address account,
         uint256 statusCombinationId
     ) public requiresAuth(v, r, s, expiry) {
-        setMultipleStatuses(account, statusCombinationId);
+        _setMultipleStatuses(account, statusCombinationId);
     }
 
     function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
-        setStatus(account, statusId);
+        _setStatus(account, statusId);
     }
 
     function grantStatuses(address account, uint256 statusCombinationId) public override onlyRole(ADMIN_ROLE) {
-        setMultipleStatuses(account, statusCombinationId);
+        _setMultipleStatuses(account, statusCombinationId);
     }
 
     function revokeStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
-        unsetStatus(account, statusId);
+        _unsetStatus(account, statusId);
     }
 
     function revokeStatuses(address account, uint256 statusCombinationId) public override onlyRole(ADMIN_ROLE) {
