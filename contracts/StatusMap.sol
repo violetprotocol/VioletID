@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "hardhat/console.sol";
-
 /**
  * @dev Provides a mapping from an address to a 256-bit unsigned integer where each bit, identified by its `index`,
  * is used as a boolean flag to represent a different "status".

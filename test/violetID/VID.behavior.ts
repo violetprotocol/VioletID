@@ -363,7 +363,7 @@ export function shouldBehaveLikeVioletID(): void {
     // TODO
   });
 
-  describe.only("Conversion functions", async () => {
+  describe("Conversion functions", async () => {
     const statuses = [1, 3, 6, 4];
 
     describe("getStatusesFromCombinationId", async function () {
