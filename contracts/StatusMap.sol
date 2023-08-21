@@ -62,23 +62,22 @@ contract StatusMap {
      * @dev Calculates the list of `statuses` given a `statusCombinationId`.
      */
     function getStatusesFromCombinationId(uint256 statusCombinationId) external pure returns (uint8[] memory statuses) {
-        bool isCollecting;
-        do {
-            isCollecting = statuses.length != 0;
-            uint256 numberOfStatuses;
-            uint256 currentStatusCombinationId = statusCombinationId;
+        uint256 numberOfStatuses;
+        uint8[256] memory tempStatusArray;
 
-            for (uint8 i = 0; currentStatusCombinationId > 0; i++) {
-                if (currentStatusCombinationId & 1 != 0) {
-                    if (isCollecting) statuses[numberOfStatuses] = i;
-
-                    numberOfStatuses += 1;
-                }
-                currentStatusCombinationId = currentStatusCombinationId >> 1;
+        for (uint8 i = 0; statusCombinationId > 0; i++) {
+            if (statusCombinationId & 1 != 0) {
+                tempStatusArray[numberOfStatuses] = i;
+                numberOfStatuses += 1;
             }
+            statusCombinationId = statusCombinationId >> 1;
+        }
 
-            if (!isCollecting) statuses = new uint8[](numberOfStatuses);
-        } while (!isCollecting);
+        statuses = new uint8[](numberOfStatuses);
+
+        for (uint8 i = 0; i < numberOfStatuses; i++) {
+            statuses[i] = tempStatusArray[i];
+        }
     }
 
     /**
