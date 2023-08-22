@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { utils } from "ethers";
 import { keccak256, solidityKeccak256, toUtf8Bytes } from "ethers/lib/utils";
 
+import { VioletID, VioletID__factory } from "../../src/types";
 import { generateAccessToken } from "../utils/generateAccessToken";
 import { getStatusCombinationId } from "../utils/getStatusCombinationId";
 
@@ -41,7 +42,23 @@ export function shouldBehaveLikeVioletID(): void {
     });
   });
 
-  describe("upgrades", async function () {});
+  describe("upgrades", async function () {
+    describe("_authorizeUpgrade", async function () {
+      it("should successfully upgrade from owner", async function () {
+        const VioletIDFactory: VioletID__factory = <VioletID__factory>await ethers.getContractFactory("VioletID");
+        const violetID: VioletID = await VioletIDFactory.deploy();
+        await violetID.deployed();
+
+        await expect(this.violetID.connect(this.signers.owner).upgradeTo(violetID.address)).to.not.be.reverted;
+      });
+
+      it("should fail to upgrade from non owner", async function () {
+        await expect(this.violetID.connect(this.signers.admin).upgradeTo(this.violetID.address)).to.be.revertedWith(
+          `AccessControl: account ${this.signers.admin.address.toLowerCase()} is missing role ${await this.violetID.callStatic.OWNER_ROLE()}`,
+        );
+      });
+    });
+  });
 
   describe("grantRole", async function () {
     context("as owner", async function () {
