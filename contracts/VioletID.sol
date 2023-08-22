@@ -87,6 +87,10 @@ contract VioletID is
         unsetStatus(account, statusId);
     }
 
+    function revokeStatuses(address account, uint256 statusCombinationId) public override onlyRole(ADMIN_ROLE) {
+        unsetMultipleStatuses(account, statusCombinationId);
+    }
+
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(OWNER_ROLE) {}
 

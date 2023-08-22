@@ -20,4 +20,6 @@ interface IVioletID {
     function grantStatuses(address account, uint256 statusCombinationId) external;
 
     function revokeStatus(address account, uint8 statusId) external;
+
+    function revokeStatuses(address account, uint256 statusCombinationId) external;
 }

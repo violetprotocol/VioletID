@@ -311,6 +311,226 @@ export function shouldBehaveLikeVioletID(): void {
     });
   });
 
+  describe("revokeStatuses", async function () {
+    context("EOA target", async function () {
+      // Initially grant these statuses
+      const statuses = [
+        Status.REGISTERED_WITH_VIOLET,
+        Status.IS_INDIVIDUAL,
+        Status.IS_US_ACCREDITED_INVESTOR,
+        Status.IS_US,
+      ];
+      const initialCombinationIdOfStatuses = getStatusCombinationId(statuses);
+      beforeEach("grantStatuses", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .grantStatuses(this.signers.user.address, initialCombinationIdOfStatuses),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatuses(this.signers.user.address, initialCombinationIdOfStatuses)).to.be.true;
+      });
+
+      // Subset of statuses to revoke
+      const statusesToRevoke = [Status.IS_US_ACCREDITED_INVESTOR, Status.IS_US];
+      const combinationIdOfStatusesToRevoke = getStatusCombinationId(statusesToRevoke);
+
+      it("as admin should succeed", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatuses(this.signers.user.address, combinationIdOfStatusesToRevoke),
+        ).to.not.be.reverted;
+        // Revoked statuses
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US)).to.be.false;
+        // Untouched statuses
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
+      });
+
+      it("as owner should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.owner)
+            .revokeStatuses(this.signers.user.address, combinationIdOfStatusesToRevoke),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
+
+        expect(await this.violetID.hasStatuses(this.signers.user.address, initialCombinationIdOfStatuses)).to.be.true;
+      });
+
+      it("as user should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.user)
+            .revokeStatuses(this.signers.user.address, combinationIdOfStatusesToRevoke),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
+
+        expect(await this.violetID.hasStatuses(this.signers.user.address, initialCombinationIdOfStatuses)).to.be.true;
+      });
+
+      it("revoking a status the address does not have should have no adverse effect", async function () {
+        // We revoke 2 statuses, one that the address has and one that the address does not.
+        const combinationId = getStatusCombinationId([Status.IS_US, Status.IS_BUSINESS]);
+
+        await expect(
+          this.violetID.connect(this.signers.admin).revokeStatuses(this.signers.user.address, combinationId),
+        ).to.not.be.reverted;
+
+        // Revoked statuses
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US)).to.be.false;
+        // Untouched statuses
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_BUSINESS)).to.be.false;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
+      });
+
+      it("revoking twice should have no adverse effect", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatuses(this.signers.user.address, combinationIdOfStatusesToRevoke),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatuses(this.signers.user.address, combinationIdOfStatusesToRevoke)).to.be.false;
+        // Revoked statuses
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US)).to.be.false;
+        // Untouched statuses
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatuses(this.signers.user.address, combinationIdOfStatusesToRevoke),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatuses(this.signers.user.address, combinationIdOfStatusesToRevoke)).to.be.false;
+        // Revoked statuses
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US)).to.be.false;
+        // Untouched statuses
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
+      });
+    });
+
+    context("Contract target", async function () {
+      // Initially grant these statuses
+      const statuses = [
+        Status.REGISTERED_WITH_VIOLET,
+        Status.IS_BUSINESS,
+        Status.IS_US_ACCREDITED_INVESTOR,
+        Status.IS_US,
+      ];
+      const initialCombinationIdOfStatuses = getStatusCombinationId(statuses);
+      beforeEach("grantStatuses", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .grantStatuses(this.mockContract.address, initialCombinationIdOfStatuses),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatuses(this.mockContract.address, initialCombinationIdOfStatuses)).to.be.true;
+      });
+
+      // Subset of statuses to revoke
+      const statusesToRevoke = [Status.IS_US_ACCREDITED_INVESTOR, Status.IS_US];
+      const combinationIdOfStatusesToRevoke = getStatusCombinationId(statusesToRevoke);
+
+      it("as admin should succeed", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke),
+        ).to.not.be.reverted;
+        // Revoked statuses
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US)).to.be.false;
+        // Untouched statuses
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_BUSINESS)).to.be.true;
+      });
+
+      it("as owner should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.owner)
+            .revokeStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
+
+        expect(await this.violetID.hasStatuses(this.mockContract.address, initialCombinationIdOfStatuses)).to.be.true;
+      });
+
+      it("as user should fail", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.user)
+            .revokeStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke),
+        ).to.be.revertedWith(
+          `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+        );
+
+        expect(await this.violetID.hasStatuses(this.mockContract.address, initialCombinationIdOfStatuses)).to.be.true;
+      });
+
+      it("revoking a status the address does not have should have no adverse effect", async function () {
+        // We revoke 2 statuses, one that the address has and one that the address does not.
+        const combinationId = getStatusCombinationId([Status.IS_US, Status.IS_INDIVIDUAL]);
+
+        await expect(
+          this.violetID.connect(this.signers.admin).revokeStatuses(this.mockContract.address, combinationId),
+        ).to.not.be.reverted;
+
+        // Revoked statuses
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US)).to.be.false;
+        // Untouched statuses
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_INDIVIDUAL)).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_BUSINESS)).to.be.true;
+      });
+
+      it("revoking twice should have no adverse effect", async function () {
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke)).to.be.false;
+        // Revoked statuses
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US)).to.be.false;
+        // Untouched statuses
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_BUSINESS)).to.be.true;
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke),
+        ).to.not.be.reverted;
+
+        expect(await this.violetID.hasStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke)).to.be.false;
+        // Revoked statuses
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US)).to.be.false;
+        // Untouched statuses
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_BUSINESS)).to.be.true;
+      });
+    });
+  });
+
   describe("hasStatus", async function () {
     context("EOA holder", async function () {
       it("user should have status", async function () {
