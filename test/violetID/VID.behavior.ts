@@ -101,7 +101,7 @@ export function shouldBehaveLikeVioletID(): void {
           await this.violetID.connect(this.signers.owner).pause();
         });
 
-        it("should successfully pause from owner", async function () {
+        it("should successfully unpause from owner", async function () {
           await expect(this.violetID.connect(this.signers.owner).unpause()).to.not.be.reverted;
 
           await expect(
