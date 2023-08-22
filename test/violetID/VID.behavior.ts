@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { utils } from "ethers";
-import { toUtf8Bytes } from "ethers/lib/utils";
+import { keccak256, solidityKeccak256, toUtf8Bytes } from "ethers/lib/utils";
 
 import { generateAccessToken } from "../utils/generateAccessToken";
 import { getStatusCombinationId } from "../utils/getStatusCombinationId";
@@ -22,6 +22,27 @@ const OWNER_ROLE = utils.keccak256(toUtf8Bytes("OWNER_ROLE"));
 const ADMIN_ROLE = utils.keccak256(toUtf8Bytes("ADMIN_ROLE"));
 
 export function shouldBehaveLikeVioletID(): void {
+  describe("EIP-165", async function () {
+    const eip165InterfaceId = "0x01ffc9a7";
+    const violetIDInterfaceId = "0xbfb8952c";
+
+    it("should support interface eip-165", async function () {
+      expect(await this.violetID.callStatic.supportsInterface(eip165InterfaceId)).to.be.true;
+    });
+
+    it("should support violetID interface", async function () {
+      expect(await this.violetID.callStatic.supportsInterface(violetIDInterfaceId)).to.be.true;
+    });
+
+    it("should not support invalid interface", async function () {
+      const invalidInterface = "0xffffffff";
+
+      expect(await this.violetID.callStatic.supportsInterface(invalidInterface)).to.be.false;
+    });
+  });
+
+  describe("upgrades", async function () {});
+
   describe("grantRole", async function () {
     context("as owner", async function () {
       it("ADMIN_ROLE should succeed", async function () {

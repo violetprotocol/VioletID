@@ -94,8 +94,8 @@ contract VioletID is
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(OWNER_ROLE) {}
 
-    // The following functions are overrides required by Solidity.
+    // EIP-165 compatibility as required by AccessControlUpgradeable
     function supportsInterface(bytes4 interfaceId) public view override(AccessControlUpgradeable) returns (bool) {
-        return super.supportsInterface(interfaceId);
+        return interfaceId == type(IVioletID).interfaceId || super.supportsInterface(interfaceId);
     }
 }
