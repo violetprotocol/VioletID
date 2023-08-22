@@ -12,7 +12,7 @@ contract StatusMap {
     /**
      * @dev Returns whether the bit at `index` is set for a specific account.
      */
-    function isStatusSet(address account, uint8 index) internal view returns (bool) {
+    function _isStatusSet(address account, uint8 index) internal view returns (bool) {
         uint256 mask = 1 << index;
         return statusesByAccount[account] & mask != 0;
     }
@@ -20,32 +20,32 @@ contract StatusMap {
     /**
      * @dev Returns whether a specific set of bits are set for a given account.
      */
-    function areStatusesSet(address account, uint256 mask) internal view returns (bool) {
+    function _areStatusesSet(address account, uint256 mask) internal view returns (bool) {
         return statusesByAccount[account] & mask == mask;
     }
 
     /**
      * @dev Sets the bit at `index` to the boolean `value` for the account `account`.
      */
-    function setStatusTo(address account, uint256 index, bool value) internal {
+    function _setStatusTo(address account, uint256 index, bool value) internal {
         if (value) {
-            setStatus(account, index);
+            _setStatus(account, index);
         } else {
-            unsetStatus(account, index);
+            _unsetStatus(account, index);
         }
     }
 
     /**
      * @dev Sets multiple bits for the account `account` using a provided `indicesMask`.
      */
-    function setMultipleStatuses(address account, uint256 indicesMask) internal {
+    function _setMultipleStatuses(address account, uint256 indicesMask) internal {
         statusesByAccount[account] |= indicesMask;
     }
 
     /**
      * @dev Sets the bit at `index` for the account `account`.
      */
-    function setStatus(address account, uint256 index) internal {
+    function _setStatus(address account, uint256 index) internal {
         uint256 mask = 1 << (index);
         statusesByAccount[account] |= mask;
     }
@@ -60,7 +60,7 @@ contract StatusMap {
     /**
      * @dev Unsets the bit at `index` for the account `account`.
      */
-    function unsetStatus(address account, uint256 index) internal {
+    function _unsetStatus(address account, uint256 index) internal {
         uint256 mask = 1 << index;
         statusesByAccount[account] &= ~mask;
     }

@@ -57,11 +57,11 @@ contract VioletID is
     }
 
     function hasStatus(address account, uint8 statusId) public view override returns (bool) {
-        return isStatusSet(account, statusId);
+        return _isStatusSet(account, statusId);
     }
 
     function hasStatuses(address account, uint256 statusCombinationId) public view override returns (bool) {
-        return areStatusesSet(account, statusCombinationId);
+        return _areStatusesSet(account, statusCombinationId);
     }
 
     function claimStatuses(
@@ -71,20 +71,23 @@ contract VioletID is
         uint256 expiry,
         address account,
         uint256 statusCombinationId
-    ) public requiresAuth(v, r, s, expiry) {
-        setMultipleStatuses(account, statusCombinationId);
+    ) public requiresAuth(v, r, s, expiry) whenNotPaused {
+        _setMultipleStatuses(account, statusCombinationId);
     }
 
-    function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
-        setStatus(account, statusId);
+    function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        _setStatus(account, statusId);
     }
 
-    function grantStatuses(address account, uint256 statusCombinationId) public override onlyRole(ADMIN_ROLE) {
-        setMultipleStatuses(account, statusCombinationId);
+    function grantStatuses(
+        address account,
+        uint256 statusCombinationId
+    ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        _setMultipleStatuses(account, statusCombinationId);
     }
 
-    function revokeStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
-        unsetStatus(account, statusId);
+    function revokeStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        _unsetStatus(account, statusId);
     }
 
     function revokeStatuses(address account, uint256 statusCombinationId) public override onlyRole(ADMIN_ROLE) {
@@ -94,8 +97,8 @@ contract VioletID is
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(OWNER_ROLE) {}
 
-    // The following functions are overrides required by Solidity.
+    // EIP-165 compatibility as required by AccessControlUpgradeable
     function supportsInterface(bytes4 interfaceId) public view override(AccessControlUpgradeable) returns (bool) {
-        return super.supportsInterface(interfaceId);
+        return interfaceId == type(IVioletID).interfaceId || super.supportsInterface(interfaceId);
     }
 }

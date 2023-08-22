@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155ReceiverUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 
-contract MockContract is IERC1155ReceiverUpgradeable {
+contract MockVioletIDReceiver is IERC1155ReceiverUpgradeable {
     address public immutable _violetId;
 
     constructor(address _violetId_) {
