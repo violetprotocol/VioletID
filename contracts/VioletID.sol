@@ -71,20 +71,23 @@ contract VioletID is
         uint256 expiry,
         address account,
         uint256 statusCombinationId
-    ) public requiresAuth(v, r, s, expiry) {
-        _setMultipleStatuses(account, statusCombinationId);
+    ) public requiresAuth(v, r, s, expiry) whenNotPaused {
+        setMultipleStatuses(account, statusCombinationId);
     }
 
-    function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
-        _setStatus(account, statusId);
+    function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        setStatus(account, statusId);
     }
 
-    function grantStatuses(address account, uint256 statusCombinationId) public override onlyRole(ADMIN_ROLE) {
-        _setMultipleStatuses(account, statusCombinationId);
+    function grantStatuses(
+        address account,
+        uint256 statusCombinationId
+    ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        setMultipleStatuses(account, statusCombinationId);
     }
 
-    function revokeStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) {
-        _unsetStatus(account, statusId);
+    function revokeStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        unsetStatus(account, statusId);
     }
 
     function revokeStatuses(address account, uint256 statusCombinationId) public override onlyRole(ADMIN_ROLE) {

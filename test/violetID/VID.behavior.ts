@@ -60,6 +60,58 @@ export function shouldBehaveLikeVioletID(): void {
     });
   });
 
+  describe("pauseable", async function () {
+    describe("pause", async function () {
+      it("should successfully pause from owner", async function () {
+        await expect(this.violetID.connect(this.signers.owner).pause()).to.not.be.reverted;
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .grantStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
+        ).to.be.revertedWith("Pausable: paused");
+      });
+
+      it("should fail to pause from non-owner", async function () {
+        await expect(this.violetID.connect(this.signers.admin).pause()).to.be.revertedWith(
+          `AccessControl: account ${this.signers.admin.address.toLowerCase()} is missing role ${await this.violetID.callStatic.OWNER_ROLE()}`,
+        );
+      });
+
+      context("when paused", async function () {
+        beforeEach("pause", async function () {
+          await this.violetID.connect(this.signers.owner).pause();
+        });
+
+        it("should fail to pause when already paused", async function () {
+          await expect(this.violetID.connect(this.signers.owner).pause()).to.be.revertedWith("Pausable: paused");
+        });
+      });
+    });
+
+    describe("unpause", async function () {
+      context("when paused", async function () {
+        beforeEach("pause", async function () {
+          await this.violetID.connect(this.signers.owner).pause();
+        });
+
+        it("should successfully pause from owner", async function () {
+          await expect(this.violetID.connect(this.signers.owner).unpause()).to.not.be.reverted;
+        });
+
+        it("should fail to unpause from non-owner", async function () {
+          await expect(this.violetID.connect(this.signers.admin).unpause()).to.be.revertedWith(
+            `AccessControl: account ${this.signers.admin.address.toLowerCase()} is missing role ${await this.violetID.callStatic.OWNER_ROLE()}`,
+          );
+        });
+      });
+
+      it("should fail to unpause when not paused", async function () {
+        await expect(this.violetID.connect(this.signers.owner).unpause()).to.be.revertedWith("Pausable: not paused");
+      });
+    });
+  });
+
   describe("grantRole", async function () {
     context("as owner", async function () {
       it("ADMIN_ROLE should succeed", async function () {
