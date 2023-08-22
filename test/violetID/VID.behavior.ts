@@ -76,6 +76,12 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(this.violetID.connect(this.signers.admin).pause()).to.be.revertedWith(
           `AccessControl: account ${this.signers.admin.address.toLowerCase()} is missing role ${await this.violetID.callStatic.OWNER_ROLE()}`,
         );
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .grantStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
+        ).to.not.be.reverted;
       });
 
       context("when paused", async function () {
@@ -97,12 +103,24 @@ export function shouldBehaveLikeVioletID(): void {
 
         it("should successfully pause from owner", async function () {
           await expect(this.violetID.connect(this.signers.owner).unpause()).to.not.be.reverted;
+
+          await expect(
+            this.violetID
+              .connect(this.signers.admin)
+              .grantStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
+          ).to.not.be.reverted;
         });
 
         it("should fail to unpause from non-owner", async function () {
           await expect(this.violetID.connect(this.signers.admin).unpause()).to.be.revertedWith(
             `AccessControl: account ${this.signers.admin.address.toLowerCase()} is missing role ${await this.violetID.callStatic.OWNER_ROLE()}`,
           );
+
+          await expect(
+            this.violetID
+              .connect(this.signers.admin)
+              .grantStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
+          ).to.be.revertedWith("Pausable: paused");
         });
       });
 
