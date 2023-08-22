@@ -131,7 +131,7 @@ export function shouldBehaveLikeStatusMap(): void {
   });
 
   describe("Conversion functions", async () => {
-    const statuses = [
+    const statusesList = [
       [0, 1, 3, 6, 4],
       [0, 2, 3, 5, 7],
       [1, 2, 3, 5, 6],
@@ -141,10 +141,10 @@ export function shouldBehaveLikeStatusMap(): void {
 
     describe("getStatusesFromCombinationId", async function () {
       it("should return the correct status combination id from list of statuses", async function () {
-        statuses.forEach(async (status) => {
-          const combinationId = getStatusCombinationId(status);
+        statusesList.forEach(async (statuses) => {
+          const combinationId = getStatusCombinationId(statuses);
           expect(await this.statusMap.callStatic.getStatusesFromCombinationId(combinationId)).to.deep.equal(
-            statuses.sort(),
+            statusesList.sort(),
           );
         });
       });
@@ -152,9 +152,9 @@ export function shouldBehaveLikeStatusMap(): void {
 
     describe("getStatusCombinationId", async function () {
       it("should return the correct statuses from a combination id", async function () {
-        statuses.forEach(async (status) => {
-          const combinationId = getStatusCombinationId(status);
-          expect(await this.statusMap.callStatic.getStatusCombinationId(status)).to.equal(combinationId);
+        statusesList.forEach(async (statuses) => {
+          const combinationId = getStatusCombinationId(statuses);
+          expect(await this.statusMap.callStatic.getStatusCombinationId(statuses)).to.equal(combinationId);
         });
       });
     });
