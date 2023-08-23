@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13;
 
-import "./IAccessTokenVerifier.sol";
+import { IAccessTokenVerifier, AccessToken, FunctionCall } from "./IAccessTokenVerifier.sol";
 
 contract AccessTokenConsumerUpgradeable {
     IAccessTokenVerifier private _verifier;
     mapping(bytes32 => bool) private _accessTokenUsed;
 
+    // solhint-disable-next-line func-name-mixedcase
     function __AccessTokenConsumer_init(address accessTokenVerifier) internal {
+        // solhint-disable-next-line custom-errors
         require(_verifier == IAccessTokenVerifier(address(0)), "verifier already set");
         _verifier = IAccessTokenVerifier(accessTokenVerifier);
     }
@@ -19,6 +21,7 @@ contract AccessTokenConsumerUpgradeable {
         uint256 expiry
     ) {
         // VF -> Verification Failure
+        // solhint-disable-next-line custom-errors
         require(verify(v, r, s, expiry), "AccessToken: VF");
         _consumeAccessToken(v, r, s, expiry);
         _;
@@ -26,6 +29,7 @@ contract AccessTokenConsumerUpgradeable {
 
     function verify(uint8 v, bytes32 r, bytes32 s, uint256 expiry) internal view returns (bool) {
         // AU -> Already Used
+        // solhint-disable-next-line custom-errors
         require(!_isAccessTokenUsed(v, r, s, expiry), "AccessToken: AU");
 
         AccessToken memory token = constructToken(expiry);

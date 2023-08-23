@@ -53,7 +53,7 @@ contract StatusMap {
     /**
      * @dev Unsets multiple bits for the account `account` using a provided `indicesMask`.
      */
-    function unsetMultipleStatuses(address account, uint256 indicesMask) internal {
+    function _unsetMultipleStatuses(address account, uint256 indicesMask) internal {
         statusesByAccount[account] &= ~indicesMask;
     }
 
@@ -66,22 +66,22 @@ contract StatusMap {
     }
 
     /**
-     * @dev Calculates the list of `statuses` given a `statusCombinationId`.
+     * @dev Calculates the list of `statuses` given a `indicesMask`.
      */
-    function getStatusesFromCombinationId(uint256 statusCombinationId) external pure returns (uint8[] memory statuses) {
+    function getStatusIndexesFromIndicesMask(uint256 indicesMask) external pure returns (uint8[] memory statuses) {
         uint256 numberOfStatuses;
         uint8[256] memory tempStatusArray;
 
-        // iterate indices of bits as long as statusCombinationId has a value
-        for (uint8 i = 0; statusCombinationId > 0; i++) {
+        // iterate indices of bits as long as indicesMask has a value
+        for (uint8 i = 0; indicesMask > 0; i++) {
             // If statusCombination has a value at the current bit then a status is set, record it in temp array
-            if (statusCombinationId & 1 != 0) {
+            if (indicesMask & 1 != 0) {
                 tempStatusArray[numberOfStatuses] = i;
                 numberOfStatuses += 1;
             }
 
-            // Bitshift combination id by one place
-            statusCombinationId = statusCombinationId >> 1;
+            // Bitshift indices mask by one place
+            indicesMask = indicesMask >> 1;
         }
 
         // instantiate fixed length array
@@ -94,12 +94,12 @@ contract StatusMap {
     }
 
     /**
-     * @dev Calculates the `statusCombinationId` given a list of `statuses`.
+     * @dev Calculates the `indicesMask` given a list of status indexes as `statusIds`.
      */
-    function getStatusCombinationId(uint8[] calldata statusIds) external pure returns (uint256 statusCombinationId) {
+    function getStatusCombinationId(uint8[] calldata statusIds) external pure returns (uint256 indicesMask) {
         for (uint256 i = 0; i < statusIds.length; i++) {
             uint256 status = 1 << statusIds[i];
-            statusCombinationId += status;
+            indicesMask += status;
         }
     }
 }

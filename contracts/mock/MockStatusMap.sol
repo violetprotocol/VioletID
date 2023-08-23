@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "../StatusMap.sol";
+import { StatusMap } from "../StatusMap.sol";
 
 contract MockStatusMap is StatusMap {
     function isStatusSet(address account, uint8 index) public view returns (bool) {

@@ -12,7 +12,7 @@ export const generateAccessToken = async (
   functionSignature: string,
   caller: Wallet | SignerWithAddress,
   contract: VioletID,
-  parameters: any[],
+  parameters: string | BigNumber[],
   expiry?: BigNumber,
 ) => {
   const token = {
