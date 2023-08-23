@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { utils } from "ethers";
 
 import { getStatusCombinationId } from "../utils/getStatusCombinationId";
 
