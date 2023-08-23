@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { utils } from "ethers";
-import { keccak256, solidityKeccak256, toUtf8Bytes } from "ethers/lib/utils";
+import { toUtf8Bytes } from "ethers/lib/utils";
 
 import { VioletID, VioletID__factory } from "../../src/types";
 import { generateAccessToken } from "../utils/generateAccessToken";
@@ -25,7 +25,7 @@ const ADMIN_ROLE = utils.keccak256(toUtf8Bytes("ADMIN_ROLE"));
 export function shouldBehaveLikeVioletID(): void {
   describe("EIP-165", async function () {
     const eip165InterfaceId = "0x01ffc9a7";
-    const violetIDInterfaceId = "0xbfb8952c";
+    const violetIDInterfaceId = "0xe7267f7e";
 
     it("should support interface eip-165", async function () {
       expect(await this.violetID.callStatic.supportsInterface(eip165InterfaceId)).to.be.true;
@@ -69,6 +69,30 @@ export function shouldBehaveLikeVioletID(): void {
           this.violetID
             .connect(this.signers.admin)
             .grantStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
+        ).to.be.revertedWith("Pausable: paused");
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .grantStatuses(
+              this.signers.user.address,
+              getStatusCombinationId([Status.REGISTERED_WITH_VIOLET, Status.IS_INDIVIDUAL]),
+            ),
+        ).to.be.revertedWith("Pausable: paused");
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
+        ).to.be.revertedWith("Pausable: paused");
+
+        await expect(
+          this.violetID
+            .connect(this.signers.admin)
+            .revokeStatuses(
+              this.signers.user.address,
+              getStatusCombinationId([Status.REGISTERED_WITH_VIOLET, Status.IS_INDIVIDUAL]),
+            ),
         ).to.be.revertedWith("Pausable: paused");
       });
 
@@ -552,10 +576,12 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatuses(this.mockContract.address, initialCombinationIdOfStatuses),
+            .grantStatuses(this.mockVIDReceiver.address, initialCombinationIdOfStatuses),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.hasStatuses(this.mockContract.address, initialCombinationIdOfStatuses)).to.be.true;
+        expect(
+          await this.violetID.callStatic.hasStatuses(this.mockVIDReceiver.address, initialCombinationIdOfStatuses),
+        ).to.be.true;
       });
 
       // Subset of statuses to revoke
@@ -566,38 +592,44 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke),
+            .revokeStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
         ).to.not.be.reverted;
         // Revoked statuses
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US)).to.be.false;
+        expect(
+          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US)).to.be.false;
         // Untouched statuses
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_BUSINESS)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_BUSINESS)).to.be.true;
       });
 
       it("as owner should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .revokeStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke),
+            .revokeStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(await this.violetID.hasStatuses(this.mockContract.address, initialCombinationIdOfStatuses)).to.be.true;
+        expect(
+          await this.violetID.hasStatuses(this.mockVIDReceiver.address, initialCombinationIdOfStatuses),
+        ).to.be.true;
       });
 
       it("as user should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .revokeStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke),
+            .revokeStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(await this.violetID.hasStatuses(this.mockContract.address, initialCombinationIdOfStatuses)).to.be.true;
+        expect(
+          await this.violetID.hasStatuses(this.mockVIDReceiver.address, initialCombinationIdOfStatuses),
+        ).to.be.true;
       });
 
       it("revoking a status the address does not have should have no adverse effect", async function () {
@@ -605,46 +637,56 @@ export function shouldBehaveLikeVioletID(): void {
         const combinationId = getStatusCombinationId([Status.IS_US, Status.IS_INDIVIDUAL]);
 
         await expect(
-          this.violetID.connect(this.signers.admin).revokeStatuses(this.mockContract.address, combinationId),
+          this.violetID.connect(this.signers.admin).revokeStatuses(this.mockVIDReceiver.address, combinationId),
         ).to.not.be.reverted;
 
         // Revoked statuses
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US)).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US)).to.be.false;
         // Untouched statuses
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_INDIVIDUAL)).to.be.false;
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_BUSINESS)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_INDIVIDUAL)).to.be.false;
+        expect(
+          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_BUSINESS)).to.be.true;
       });
 
       it("revoking twice should have no adverse effect", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke),
+            .revokeStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.hasStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke)).to.be.false;
+        expect(
+          await this.violetID.hasStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
+        ).to.be.false;
         // Revoked statuses
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US)).to.be.false;
+        expect(
+          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US)).to.be.false;
         // Untouched statuses
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_BUSINESS)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_BUSINESS)).to.be.true;
 
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke),
+            .revokeStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.hasStatuses(this.mockContract.address, combinationIdOfStatusesToRevoke)).to.be.false;
+        expect(
+          await this.violetID.hasStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
+        ).to.be.false;
         // Revoked statuses
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_US)).to.be.false;
+        expect(
+          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+        ).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US)).to.be.false;
         // Untouched statuses
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
-        expect(await this.violetID.hasStatus(this.mockContract.address, Status.IS_BUSINESS)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_BUSINESS)).to.be.true;
       });
     });
   });
