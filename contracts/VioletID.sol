@@ -10,6 +10,15 @@ import "./IVioletID.sol";
 import "./StatusMap.sol";
 import "./temp/AccessTokenConsumerUpgradeable.sol";
 
+/**
+ * @dev VioletID contract
+ * 
+ * Implements IVioletID with additional features:
+ *      - AccessControl
+ *      - Pausable
+ *      - Upgradeable
+ *      - Ethereum Access Token compatible
+ */
 contract VioletID is
     Initializable,
     AccessControlUpgradeable,
@@ -174,6 +183,7 @@ contract VioletID is
      * See {AccessControlUpgradeable-supportsInterface}
      */
     function supportsInterface(bytes4 interfaceId) public view override(AccessControlUpgradeable) returns (bool) {
+        console.logU
         return interfaceId == type(IVioletID).interfaceId || super.supportsInterface(interfaceId);
     }
 }
