@@ -19,14 +19,19 @@ contract VioletID is
     StatusMap,
     AccessTokenConsumerUpgradeable
 {
-    /// @notice Owner role for:
-    ///     - Upgrading
-    ///     - Pausing
-    ///     - Role Managing
+    /**
+     * @dev Admin role for:
+     *      - Upgrading
+     *      - Pausing
+     *      - Role Managing
+     */
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
-    /// @notice Admin role for:
-    ///     - Granting statuses
-    ///     - Revoking statuses
+
+    /**
+     * @dev Admin role for:
+     *      - Granting statuses
+     *      - Revoking statuses
+     */
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -34,8 +39,13 @@ contract VioletID is
         _disableInitializers();
     }
 
-    /// @notice Initializes the contract for usage after deployment.
-    /// @dev initialization sets up roles and other on construction setup.
+    /**
+     * @dev See {Initializable}
+     *
+     * Initializes other parent contract setups
+     *
+     * Creates the OWNER_ROLE and ADMIN_ROLE and assigns to msg.sender
+     */
     function initialize(address _eatVerifier) public initializer {
         __AccessControl_init();
         __Pausable_init();
@@ -50,32 +60,47 @@ contract VioletID is
         _grantRole(ADMIN_ROLE, msg.sender);
     }
 
-    /// @notice Pauses the smart contract, disabling status granting and revoking
-    /// @dev only callable by owner
+    /**
+     * @dev See {PausableUpgradeable-_pause}
+     *
+     * Only callable by OWNER_ROLE
+     *
+     * Disables status granting and revoking functions
+     */
     function pause() public onlyRole(OWNER_ROLE) {
         _pause();
     }
 
-    /// @notice Unpauses the smart contract, enabling status granting and revoking
-    /// @dev only callable by owner
+    /**
+     * @dev See {PausableUpgradeable-_unpause}
+     *
+     * Only callable by OWNER_ROLE
+     *
+     * Enables status granting and revoking functions
+     */
     function unpause() public onlyRole(OWNER_ROLE) {
         _unpause();
     }
 
-    /// @notice Checks if an account has a particular status by its id
-    /// @dev returns true/false if the `account` has the `statusId`
+    /**
+     * @dev See {IVioletID-hasStatus}
+     */
     function hasStatus(address account, uint8 statusId) public view override returns (bool) {
         return _isStatusSet(account, statusId);
     }
 
-    /// @notice Checks if an account has a set of statuses by its combination id
-    /// @dev returns true/false if the `account` has the `statusCombinationId`
+    /**
+     * @dev See {IVioletID-hasStatuses}
+     */
     function hasStatuses(address account, uint256 statusCombinationId) public view override returns (bool) {
         return _areStatusesSet(account, statusCombinationId);
     }
 
-    /// @notice Claims a set of statuses by combination id with a valid EAT
-    /// @dev EAT-gated function for a user to claim their own statuses if granted by EAT
+    /**
+     * @dev See {IVioletID-claimStatuses}
+     *
+     * Only callable if contract is not paused
+     */
     function claimStatuses(
         uint8 v,
         bytes32 r,
@@ -87,14 +112,22 @@ contract VioletID is
         _setMultipleStatuses(account, statusCombinationId);
     }
 
-    /// @notice Grants a status by id to an account
-    /// @dev only callable by owner
+    /**
+     * @dev See {IVioletID-grantStatus}
+     *
+     * Only callable if contract is not paused
+     * Only callable by ADMIN_ROLE
+     */
     function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) whenNotPaused {
         _setStatus(account, statusId);
     }
 
-    /// @notice Grants a set of statuses by combination id to an account
-    /// @dev only callable by owner
+    /**
+     * @dev See {IVioletID-grantStatuses}
+     *
+     * Only callable if contract is not paused
+     * Only callable by ADMIN_ROLE
+     */
     function grantStatuses(
         address account,
         uint256 statusCombinationId
@@ -102,22 +135,44 @@ contract VioletID is
         _setMultipleStatuses(account, statusCombinationId);
     }
 
-    /// @notice Revokes a status by id from an account
-    /// @dev only callable by owner
+    /**
+     * @dev See {IVioletID-revokeStatus}
+     *
+     * Only callable if contract is not paused
+     * Only callable by ADMIN_ROLE
+     */
     function revokeStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) whenNotPaused {
         _unsetStatus(account, statusId);
     }
 
-    /// @notice Revokes a set of statuses by combination id from an account
-    /// @dev only callable by owner
-    function revokeStatuses(address account, uint256 statusCombinationId) public override onlyRole(ADMIN_ROLE) {
-        unsetMultipleStatuses(account, statusCombinationId);
+    /**
+     * @dev See {IVioletID-revokeStatuses}
+     *
+     * Only callable if contract is not paused
+     * Only callable by ADMIN_ROLE
+     */
+    function revokeStatuses(
+        address account,
+        uint256 statusCombinationId
+    ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        _unsetMultipleStatuses(account, statusCombinationId);
     }
 
+    /**
+     * @dev See {UUPSUpgradeable-_authorizeUpgrade}
+     *
+     * Only callable by OWNER_ROLE
+     *
+     * Overrides the hook which runs when upgrading to restrict calls to only OWNER_ROLE
+     */
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(OWNER_ROLE) {}
 
-    // EIP-165 compatibility as required by AccessControlUpgradeable
+    /**
+     * @dev EIP-165 compatibility as required by AccessControlUpgradeable
+     *
+     * See {AccessControlUpgradeable-supportsInterface}
+     */
     function supportsInterface(bytes4 interfaceId) public view override(AccessControlUpgradeable) returns (bool) {
         return interfaceId == type(IVioletID).interfaceId || super.supportsInterface(interfaceId);
     }

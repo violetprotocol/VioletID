@@ -53,7 +53,7 @@ contract StatusMap {
     /**
      * @dev Unsets multiple bits for the account `account` using a provided `indicesMask`.
      */
-    function unsetMultipleStatuses(address account, uint256 indicesMask) internal {
+    function _unsetMultipleStatuses(address account, uint256 indicesMask) internal {
         statusesByAccount[account] &= ~indicesMask;
     }
 
