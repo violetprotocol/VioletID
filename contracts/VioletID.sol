@@ -183,7 +183,6 @@ contract VioletID is
      * See {AccessControlUpgradeable-supportsInterface}
      */
     function supportsInterface(bytes4 interfaceId) public view override(AccessControlUpgradeable) returns (bool) {
-        console.logU
         return interfaceId == type(IVioletID).interfaceId || super.supportsInterface(interfaceId);
     }
 }
