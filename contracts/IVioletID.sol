@@ -3,6 +3,9 @@ pragma solidity ^0.8.20;
 
 /**
  * @dev Interface of the VioletID contract
+ *
+ * Interface of VioletID contract used for managing Violet statuses, each identified by a unique id.
+ * Keeps a record of statuses (up to 256) by address.
  */
 interface IVioletID {
     /**

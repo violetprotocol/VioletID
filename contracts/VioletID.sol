@@ -12,7 +12,7 @@ import "./temp/AccessTokenConsumerUpgradeable.sol";
 
 /**
  * @dev VioletID contract
- * 
+ *
  * Implements IVioletID with additional features:
  *      - AccessControl
  *      - Pausable
@@ -29,7 +29,7 @@ contract VioletID is
     AccessTokenConsumerUpgradeable
 {
     /**
-     * @dev Admin role for:
+     * @dev Owner role for:
      *      - Upgrading
      *      - Pausing
      *      - Role Managing
