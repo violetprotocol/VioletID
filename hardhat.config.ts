@@ -151,7 +151,10 @@ const config: HardhatUserConfig = {
     },
   },
   dependencyCompiler: {
-    paths: ["@violetprotocol/ethereum-access-token/contracts/AccessTokenVerifier.sol"],
+    paths: [
+      "@violetprotocol/ethereum-access-token/contracts/AccessTokenVerifier.sol",
+      "@violetprotocol/ethereum-access-token/contracts/upgradeable/AccessTokenConsumerUpgradeable.sol",
+    ],
   },
   typechain: {
     outDir: "src/types",
