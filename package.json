@@ -30,7 +30,7 @@
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^5.44.0",
     "@typescript-eslint/parser": "^5.44.0",
-    "@violetprotocol/ethereum-access-token": "0.3.1",
+    "@violetprotocol/ethereum-access-token": "0.3.2",
     "@violetprotocol/ethereum-access-token-helpers": "^0.2.0",
     "chai": "^4.3.7",
     "commitizen": "^4.2.5",

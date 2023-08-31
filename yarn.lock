@@ -2294,12 +2294,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@violetprotocol/ethereum-access-token@npm:0.3.1":
-  version: 0.3.1
-  resolution: "@violetprotocol/ethereum-access-token@npm:0.3.1"
+"@violetprotocol/ethereum-access-token@npm:0.3.2":
+  version: 0.3.2
+  resolution: "@violetprotocol/ethereum-access-token@npm:0.3.2"
   dependencies:
     "@openzeppelin/contracts-upgradeable": ^4.9.3
-  checksum: c45ac09e3b18a334d0b44bce65be0b3744e68ed32d93419c956c4515636a583d3074065a8db7a38d31e8901df50ae85d3bc5f067f0d611359091779372cd984f
+  checksum: 88ab1f55845f7755ee15510af1c5588227ca17233419844afecbba784270a28ddf91ff00f9f0822e744b3b2bf7a41cb55e64042d4019fc2d2611eac08288393c
   languageName: node
   linkType: hard
 
@@ -2331,7 +2331,7 @@ __metadata:
     "@types/node": ^18.11.9
     "@typescript-eslint/eslint-plugin": ^5.44.0
     "@typescript-eslint/parser": ^5.44.0
-    "@violetprotocol/ethereum-access-token": 0.3.1
+    "@violetprotocol/ethereum-access-token": 0.3.2
     "@violetprotocol/ethereum-access-token-helpers": ^0.2.0
     chai: ^4.3.7
     commitizen: ^4.2.5
