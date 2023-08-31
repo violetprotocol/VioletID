@@ -5,10 +5,12 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {
+    AccessTokenConsumerUpgradeable
+} from "@violetprotocol/ethereum-access-token/contracts/upgradeable/AccessTokenConsumerUpgradeable.sol";
 
 import { IVioletID } from "./IVioletID.sol";
 import { StatusMap } from "./StatusMap.sol";
-import { AccessTokenConsumerUpgradeable } from "./temp/AccessTokenConsumerUpgradeable.sol";
 
 /**
  * @dev VioletID contract
