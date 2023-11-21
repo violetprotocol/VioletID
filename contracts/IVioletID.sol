@@ -61,7 +61,7 @@ interface IVioletID {
      * Must set each status id contained by `statusCombinationId` to the `account`
      *
      * Status combination id is a single number that combines statuses through assigning or
-     * unassigning bits in a uint256 value by index of bit. The statusId of each status bein
+     * unassigning bits in a uint256 value by index of bit. The statusId of each status being
      * assigned represents the bit index.
      */
     function grantStatuses(address account, uint256 statusCombinationId) external;
