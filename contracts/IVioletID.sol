@@ -84,7 +84,7 @@ interface IVioletID {
      *
      * The account will be assigned the statusCombinationId in their respective array positions
      **/
-    function batchSetStatuses(address[] accountArray, uint256[] statusCombinationIdArray) external;
+    function batchSetStatuses(address[] calldata accountArray, uint256[] calldata statusCombinationIdArray) external;
 
     /**
      * @dev Revokes a `statusId` from `account`

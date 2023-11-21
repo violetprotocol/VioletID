@@ -166,10 +166,10 @@ contract VioletID is
      * Only callable by ADMIN_ROLE
      */
     function batchSetStatuses(
-        address[] accountArray,
-        uint256[] statusCombinationIdArray
+        address[] calldata accountArray,
+        uint256[] calldata statusCombinationIdArray
     ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        require(accountArray.lenght == statusCombinationIdArray.length, "AccountArray lenght mismatch");
+        require(accountArray.length == statusCombinationIdArray.length, "AccountArray length mismatch");
         for (uint256 i = 0; i < accountArray.length; i++) {
             _setMultipleStatuses(accountArray[i], statusCombinationIdArray[i]);
         }
