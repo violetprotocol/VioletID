@@ -2,7 +2,8 @@ import { expect } from "chai";
 import { utils } from "ethers";
 import { toUtf8Bytes } from "ethers/lib/utils";
 
-import { VioletID, VioletID__factory } from "../../src/types";
+import { IVioletID, VioletID, VioletID__factory } from "../../src/types";
+import violetID from "../../tasks/deploy/violetID";
 import { generateAccessToken } from "../utils/generateAccessToken";
 import { getStatusCombinationId } from "../utils/getStatusCombinationId";
 
@@ -19,13 +20,18 @@ const INDIVIDUAL_US_ACCREDITED_COMBINATION_ID = getStatusCombinationId([
   Status.IS_US_ACCREDITED_INVESTOR,
 ]);
 
+const BUSINESS_REGISTERED_WITH_VIOLET_COMBINATION_ID = getStatusCombinationId([
+  Status.IS_BUSINESS,
+  Status.REGISTERED_WITH_VIOLET,
+]);
+
 const OWNER_ROLE = utils.keccak256(toUtf8Bytes("OWNER_ROLE"));
 const ADMIN_ROLE = utils.keccak256(toUtf8Bytes("ADMIN_ROLE"));
 
 export function shouldBehaveLikeVioletID(): void {
   describe("EIP-165", async function () {
     const eip165InterfaceId = "0x01ffc9a7";
-    const violetIDInterfaceId = "0xe7267f7e";
+    const violetIDInterfaceId = "0x452ddea2";
 
     it("should support interface eip-165", async function () {
       expect(await this.violetID.callStatic.supportsInterface(eip165InterfaceId)).to.be.true;
@@ -312,6 +318,111 @@ export function shouldBehaveLikeVioletID(): void {
         .true;
       expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
       expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+    });
+  });
+
+  describe("setStatuses", async function () {
+    it("as admin should succeed", async function () {
+      await expect(
+        this.violetID
+          .connect(this.signers.admin)
+          .setStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID),
+      ).to.not.be.reverted;
+
+      expect(await this.violetID.hasStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID)).to.be
+        .true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+    });
+
+    it("as non admin should not succeed", async function () {
+      await expect(
+        this.violetID
+          .connect(this.signers.user)
+          .setStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID),
+      ).to.be.revertedWith(
+        `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+      );
+    });
+
+    it("should overwrite non set statuses", async function () {
+      await expect(
+        this.violetID
+          .connect(this.signers.admin)
+          .setStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID),
+      ).to.not.be.reverted;
+      await expect(
+        this.violetID
+          .connect(this.signers.admin)
+          .setStatuses(this.signers.user.address, BUSINESS_REGISTERED_WITH_VIOLET_COMBINATION_ID),
+      ).to.not.be.reverted;
+
+      expect(await this.violetID.hasStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID)).to.be
+        .false;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.false;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.false;
+      expect(await this.violetID.hasStatuses(this.signers.user.address, BUSINESS_REGISTERED_WITH_VIOLET_COMBINATION_ID))
+        .to.be.true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_BUSINESS)).to.be.true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+    });
+  });
+
+  describe("batchSetStatuses", async function () {
+    it("as admin should succeed", async function () {
+      await expect(
+        this.violetID
+          .connect(this.signers.admin)
+          .batchSetStatuses([this.signers.user.address], [INDIVIDUAL_US_ACCREDITED_COMBINATION_ID]),
+      ).to.not.be.reverted;
+
+      expect(await this.violetID.hasStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID)).to.be
+        .true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+    });
+
+    it("as non admin should not succeed", async function () {
+      await expect(
+        this.violetID
+          .connect(this.signers.user)
+          .batchSetStatuses([this.signers.user.address], [INDIVIDUAL_US_ACCREDITED_COMBINATION_ID]),
+      ).to.be.revertedWith(
+        `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
+      );
+    });
+
+    it("should revert if arrays are mismatched", async function () {
+      await expect(
+        this.violetID
+          .connect(this.signers.admin)
+          .batchSetStatuses(
+            [this.signers.user.address, this.signers.owner.address],
+            [INDIVIDUAL_US_ACCREDITED_COMBINATION_ID],
+          ),
+      ).to.be.revertedWith("AccountArray length mismatch");
+    });
+
+    it("should overwrite statuses for more than one user", async function () {
+      await expect(
+        this.violetID
+          .connect(this.signers.admin)
+          .batchSetStatuses(
+            [this.signers.user.address, this.signers.owner.address],
+            [INDIVIDUAL_US_ACCREDITED_COMBINATION_ID, BUSINESS_REGISTERED_WITH_VIOLET_COMBINATION_ID],
+          ),
+      ).to.not.be.reverted;
+
+      expect(await this.violetID.hasStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID)).to.be
+        .true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.true;
+      expect(await this.violetID.hasStatus(this.signers.user.address, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+
+      expect(
+        await this.violetID.hasStatuses(this.signers.owner.address, BUSINESS_REGISTERED_WITH_VIOLET_COMBINATION_ID),
+      ).to.be.true;
+      expect(await this.violetID.hasStatus(this.signers.owner.address, Status.IS_BUSINESS)).to.be.true;
+      expect(await this.violetID.hasStatus(this.signers.owner.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
     });
   });
 
