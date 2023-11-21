@@ -38,8 +38,15 @@ contract StatusMap {
     /**
      * @dev Sets multiple bits for the account `account` using a provided `indicesMask`.
      */
-    function _setMultipleStatuses(address account, uint256 indicesMask) internal {
+    function _updateMultipleStatuses(address account, uint256 indicesMask) internal {
         statusesByAccount[account] |= indicesMask;
+    }
+
+    /**
+     * @dev Sets multiple bits for the account `account` using a provided `indicesMask`.
+     */
+    function _setMultipleStatuses(address account, uint256 indicesMask) internal {
+        statusesByAccount[account] = indicesMask;
     }
 
     /**

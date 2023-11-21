@@ -120,7 +120,7 @@ contract VioletID is
         address account,
         uint256 statusCombinationId
     ) public requiresAuth(v, r, s, expiry) whenNotPaused {
-        _setMultipleStatuses(account, statusCombinationId);
+        _updateMultipleStatuses(account, statusCombinationId);
     }
 
     /**
@@ -143,7 +143,36 @@ contract VioletID is
         address account,
         uint256 statusCombinationId
     ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        _updateMultipleStatuses(account, statusCombinationId);
+    }
+
+    /**
+     * @dev See {IVioletID-setStatuses}
+     *
+     * Only callable if contract is not paused
+     * Only callable by ADMIN_ROLE
+     */
+    function setStatuses(
+        address account,
+        uint256 statusCombinationId
+    ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
         _setMultipleStatuses(account, statusCombinationId);
+    }
+
+    /**
+     * @dev See {IVioletID-batchSetStatuses}
+     *
+     * Only callable if contract is not paused
+     * Only callable by ADMIN_ROLE
+     */
+    function batchSetStatuses(
+        address[] accountArray,
+        uint256[] statusCombinationIdArray
+    ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        require(accountArray.lenght == statusCombinationIdArray.length, "AccountArray lenght mismatch");
+        for (uint256 i = 0; i < accountArray.length; i++) {
+            _setMultipleStatuses(accountArray[i], statusCombinationIdArray[i]);
+        }
     }
 
     /**
