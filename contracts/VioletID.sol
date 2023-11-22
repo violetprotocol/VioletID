@@ -154,12 +154,10 @@ contract VioletID is
      * Only callable if contract is not paused
      * Only callable by ADMIN_ROLE
      */
-    // UPDATESTATUSES
     function setStatuses(
         address account,
         uint256 statusCombinationId
     ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        //OVERWRITE
         _overwriteMultipleStatuses(account, statusCombinationId);
     }
 
