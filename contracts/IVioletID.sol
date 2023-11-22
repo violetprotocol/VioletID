@@ -70,13 +70,11 @@ interface IVioletID {
      * @dev Sets a combination of statuses as `statusCombinationId` to `account`
      *
      * Must set each status id contained by `statusCombinationId` to the `account`
-     *
-     * Status combination id is a single number that combines statuses through assigning or
-     * unassigning bits in a uint256 value by index of bit. The statusId of each status being
-     * and assigned represents the bit index.
-     * This function overwrites any statuses that are not present on the new statusCombinationId
-     * assumes that if a status is not present the account should not have the status
-     */
+     * Unlike grantStatuses which can only sets statuses to true (regardless of
+     * their current value), this method completely overwrites the value of ALL
+     * statuses of the account and sets them as what is passed as statusCombinationId.
+     * As a result, be careful not to accidentally revoke a previously granted status using this method.
+     **/
     function setStatuses(address account, uint256 statusCombinationId) external;
 
     /**

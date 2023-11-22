@@ -12,6 +12,8 @@ import {
 import { IVioletID } from "./IVioletID.sol";
 import { StatusMap } from "./StatusMap.sol";
 
+error BatchSetStatusArrayMismatch();
+
 /**
  * @dev VioletID contract
  *
@@ -169,7 +171,7 @@ contract VioletID is
         address[] calldata accountArray,
         uint256[] calldata statusCombinationIdArray
     ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        require(accountArray.length == statusCombinationIdArray.length, "AccountArray length mismatch");
+        if (accountArray.length != statusCombinationIdArray.length) revert BatchSetStatusArrayMismatch();
         for (uint256 i = 0; i < accountArray.length; i++) {
             _setMultipleStatuses(accountArray[i], statusCombinationIdArray[i]);
         }

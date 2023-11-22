@@ -400,7 +400,7 @@ export function shouldBehaveLikeVioletID(): void {
             [this.signers.user.address, this.signers.owner.address],
             [INDIVIDUAL_US_ACCREDITED_COMBINATION_ID],
           ),
-      ).to.be.revertedWith("AccountArray length mismatch");
+      ).to.be.revertedWithCustomError(this.violetID, "BatchSetStatusArrayMismatch");
     });
 
     it("should overwrite statuses for more than one user", async function () {
