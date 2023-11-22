@@ -65,7 +65,7 @@ contract StatusMap {
     }
 
     /**
-     * @dev Unsets the bit at `index` for the account `account`.
+     * @dev Sets the bit at `index` to 0 for the account `account`.
      */
     function _unassignStatus(address account, uint256 index) internal {
         uint256 mask = 1 << index;
