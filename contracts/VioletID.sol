@@ -171,9 +171,13 @@ contract VioletID is
         address[] calldata accountArray,
         uint256[] calldata statusCombinationIdArray
     ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        if (accountArray.length != statusCombinationIdArray.length) revert BatchSetStatusArrayMismatch();
-        for (uint256 i = 0; i < accountArray.length; i++) {
+        uint256 length = accountArray.length;
+        if (length != statusCombinationIdArray.length) revert BatchSetStatusArrayMismatch();
+        for (uint256 i = 0; i < length; ) {
             _setMultipleStatuses(accountArray[i], statusCombinationIdArray[i]);
+            unchecked {
+                i++;
+            }
         }
     }
 
