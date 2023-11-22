@@ -122,7 +122,7 @@ contract VioletID is
         address account,
         uint256 statusCombinationId
     ) public requiresAuth(v, r, s, expiry) whenNotPaused {
-        _updateMultipleStatuses(account, statusCombinationId);
+        _assignMultipleStatuses(account, statusCombinationId);
     }
 
     /**
@@ -132,7 +132,7 @@ contract VioletID is
      * Only callable by ADMIN_ROLE
      */
     function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        _setStatus(account, statusId);
+        _assignStatus(account, statusId);
     }
 
     /**
@@ -145,7 +145,7 @@ contract VioletID is
         address account,
         uint256 statusCombinationId
     ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        _updateMultipleStatuses(account, statusCombinationId);
+        _assignMultipleStatuses(account, statusCombinationId);
     }
 
     /**
@@ -154,11 +154,13 @@ contract VioletID is
      * Only callable if contract is not paused
      * Only callable by ADMIN_ROLE
      */
+    // UPDATESTATUSES
     function setStatuses(
         address account,
         uint256 statusCombinationId
     ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        _setMultipleStatuses(account, statusCombinationId);
+        //OVERWRITE
+        _overwriteMultipleStatuses(account, statusCombinationId);
     }
 
     /**
@@ -174,7 +176,7 @@ contract VioletID is
         uint256 length = accountArray.length;
         if (length != statusCombinationIdArray.length) revert BatchSetStatusArrayMismatch();
         for (uint256 i = 0; i < length; ) {
-            _setMultipleStatuses(accountArray[i], statusCombinationIdArray[i]);
+            _overwriteMultipleStatuses(accountArray[i], statusCombinationIdArray[i]);
             unchecked {
                 i++;
             }
@@ -188,7 +190,7 @@ contract VioletID is
      * Only callable by ADMIN_ROLE
      */
     function revokeStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        _unsetStatus(account, statusId);
+        _unassignStatus(account, statusId);
     }
 
     /**
@@ -201,7 +203,7 @@ contract VioletID is
         address account,
         uint256 statusCombinationId
     ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        _unsetMultipleStatuses(account, statusCombinationId);
+        _unassignMultipleStatuses(account, statusCombinationId);
     }
 
     /**

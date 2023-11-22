@@ -19,7 +19,7 @@ export function shouldBehaveLikeStatusMap(): void {
   describe("_isStatusSet", async function () {
     context("with status", async function () {
       beforeEach("set status", async function () {
-        await this.statusMap.setStatusTo(this.signers.user.address, Status.REGISTERED_WITH_VIOLET, true);
+        await this.statusMap.overwriteStatusTo(this.signers.user.address, Status.REGISTERED_WITH_VIOLET, true);
       });
 
       it("should return true", async function () {
@@ -38,8 +38,8 @@ export function shouldBehaveLikeStatusMap(): void {
 
   describe("_areStatusesSet", async function () {
     context("with status", async function () {
-      beforeEach("set status", async function () {
-        await this.statusMap.setMultipleStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID);
+      beforeEach("assign status", async function () {
+        await this.statusMap.assignMultipleStatuses(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID);
       });
 
       it("should return true", async function () {
@@ -62,31 +62,31 @@ export function shouldBehaveLikeStatusMap(): void {
     });
   });
 
-  describe("_setStatusTo", async function () {
+  describe("_overwriteStatusTo", async function () {
     it("should successfully set status", async function () {
-      await expect(this.statusMap.setStatusTo(this.signers.user.address, Status.REGISTERED_WITH_VIOLET, true)).to.not.be
-        .reverted;
+      await expect(this.statusMap.overwriteStatusTo(this.signers.user.address, Status.REGISTERED_WITH_VIOLET, true)).to
+        .not.be.reverted;
 
       expect(await this.statusMap.callStatic.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to
         .be.true;
     });
 
     it("should successfully unset status", async function () {
-      await expect(this.statusMap.setStatusTo(this.signers.user.address, Status.REGISTERED_WITH_VIOLET, true)).to.not.be
-        .reverted;
+      await expect(this.statusMap.overwriteStatusTo(this.signers.user.address, Status.REGISTERED_WITH_VIOLET, true)).to
+        .not.be.reverted;
 
-      await expect(this.statusMap.setStatusTo(this.signers.user.address, Status.REGISTERED_WITH_VIOLET, false)).to.not
-        .be.reverted;
+      await expect(this.statusMap.overwriteStatusTo(this.signers.user.address, Status.REGISTERED_WITH_VIOLET, false)).to
+        .not.be.reverted;
 
       expect(await this.statusMap.callStatic.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to
         .be.false;
     });
   });
 
-  describe("_setMultipleStatuses", async function () {
-    it("should successfully set multiple statuses", async function () {
+  describe("_assignMultipleStatuses", async function () {
+    it("should successfully assign multiple statuses", async function () {
       await expect(
-        this.statusMap.setMultipleStatuses(
+        this.statusMap.assignMultipleStatuses(
           this.signers.user.address,
           getStatusCombinationId([Status.REGISTERED_WITH_VIOLET, Status.IS_INDIVIDUAL]),
         ),
@@ -101,9 +101,9 @@ export function shouldBehaveLikeStatusMap(): void {
     });
   });
 
-  describe("_setStatus", async function () {
+  describe("_assignStatus", async function () {
     it("should successfully set status", async function () {
-      await expect(this.statusMap.setStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.not.be
+      await expect(this.statusMap.assignStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.not.be
         .reverted;
 
       expect(await this.statusMap.callStatic.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to
@@ -111,15 +111,15 @@ export function shouldBehaveLikeStatusMap(): void {
     });
   });
 
-  describe("_unsetStatus", async function () {
+  describe("_unassignStatus", async function () {
     context("with set status", async function () {
       beforeEach("set status", async function () {
-        this.statusMap.setStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET);
+        this.statusMap.assignStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET);
       });
 
       it("should successfully unset status", async function () {
         await expect(
-          this.statusMap.unsetStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
+          this.statusMap.unassignStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
         ).to.not.be.reverted;
 
         expect(

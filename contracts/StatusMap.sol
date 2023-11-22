@@ -27,32 +27,44 @@ contract StatusMap {
     /**
      * @dev Sets the bit at `index` to the boolean `value` for the account `account`.
      */
-    function _setStatusTo(address account, uint256 index, bool value) internal {
+    // OVERWRITEBIT
+    // overwriteBit
+    // overwriteStatus
+    // overwriteStatus
+    // function _setStatusTo(address account, uint256 index, bool value) internal {
+    function _overwriteStatusTo(address account, uint256 index, bool value) internal {
         if (value) {
-            _setStatus(account, index);
+            _assignStatus(account, index);
         } else {
-            _unsetStatus(account, index);
+            _unassignStatus(account, index);
         }
     }
 
     /**
      * @dev Sets multiple bits for the account `account` using a provided `indicesMask`.
      */
-    function _updateMultipleStatuses(address account, uint256 indicesMask) internal {
+    // SETBITS
+    // assignMultipleStatuses
+    // function _updateMultipleStatuses(address account, uint256 indicesMask) internal {
+    function _assignMultipleStatuses(address account, uint256 indicesMask) internal {
         statusesByAccount[account] |= indicesMask;
     }
 
     /**
      * @dev Sets multiple bits for the account `account` using a provided `indicesMask`.
      */
-    function _setMultipleStatuses(address account, uint256 indicesMask) internal {
+    //OVERWRITEBITS
+    // function _setMultipleStatuses(address account, uint256 indicesMask) internal {
+    function _overwriteMultipleStatuses(address account, uint256 indicesMask) internal {
         statusesByAccount[account] = indicesMask;
     }
 
     /**
      * @dev Sets the bit at `index` for the account `account`.
      */
-    function _setStatus(address account, uint256 index) internal {
+    // SETBIT
+    // function _setStatus(address account, uint256 index) internal {
+    function _assignStatus(address account, uint256 index) internal {
         uint256 mask = 1 << (index);
         statusesByAccount[account] |= mask;
     }
@@ -60,14 +72,15 @@ contract StatusMap {
     /**
      * @dev Unsets multiple bits for the account `account` using a provided `indicesMask`.
      */
-    function _unsetMultipleStatuses(address account, uint256 indicesMask) internal {
+    function _unassignMultipleStatuses(address account, uint256 indicesMask) internal {
         statusesByAccount[account] &= ~indicesMask;
     }
 
     /**
      * @dev Unsets the bit at `index` for the account `account`.
      */
-    function _unsetStatus(address account, uint256 index) internal {
+    // function _unsetStatus(address account, uint256 index) internal {
+    function _unassignStatus(address account, uint256 index) internal {
         uint256 mask = 1 << index;
         statusesByAccount[account] &= ~mask;
     }
