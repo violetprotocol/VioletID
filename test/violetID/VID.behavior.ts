@@ -2,8 +2,7 @@ import { expect } from "chai";
 import { utils } from "ethers";
 import { toUtf8Bytes } from "ethers/lib/utils";
 
-import { IVioletID, VioletID, VioletID__factory } from "../../src/types";
-import violetID from "../../tasks/deploy/violetID";
+import { VioletID, VioletID__factory } from "../../src/types";
 import { generateAccessToken } from "../utils/generateAccessToken";
 import { getStatusCombinationId } from "../utils/getStatusCombinationId";
 
