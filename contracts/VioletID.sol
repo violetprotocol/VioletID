@@ -23,7 +23,7 @@ error BatchSetStatusArrayMismatch();
  *      - Upgradeable
  *      - Ethereum Access Token compatible
  */
-contract VioletID is
+contract VioletIDv1_4_0 is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,

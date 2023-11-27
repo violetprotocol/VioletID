@@ -1,6 +1,6 @@
 import "@nomicfoundation/hardhat-ledger";
 import "@nomicfoundation/hardhat-toolbox";
-import "@nomiclabs/hardhat-etherscan";
+import "@nomicfoundation/hardhat-verify";
 import "@openzeppelin/hardhat-upgrades";
 import { config as dotenvConfig } from "dotenv";
 import * as ethers from "ethers";
@@ -90,6 +90,11 @@ const config: HardhatUserConfig = {
     excludeContracts: [],
     src: "./contracts",
   },
+  defender: {
+    apiKey: process.env.DEFENDER_API_KEY || "",
+    apiSecret: process.env.DEFENDER_API_SECRET || "",
+    useDefenderDeploy: true,
+  },
   etherscan: {
     apiKey: {
       arbitrumOne: process.env.ARBISCAN_API_KEY || "",
@@ -120,7 +125,7 @@ const config: HardhatUserConfig = {
     optimism: getChainConfig("optimism-mainnet"),
     optimismGoerli: {
       ...getChainConfig("optimism-goerli"),
-      gasPrice: ethers.utils.parseUnits("2", "gwei").toNumber(),
+      gasPrice: Number(ethers.parseUnits("2", "gwei")),
     },
     polygon: getChainConfig("polygon-mainnet"),
     polygonMumbai: getChainConfig("polygon-mumbai"),
