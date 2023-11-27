@@ -43,6 +43,7 @@ const chainIds = {
   rinkeby: 4,
   kovan: 42,
   goerli: 5,
+  sepolia: 11155111,
 };
 
 // If a ledger address is defined, it will use that and nothing else.
@@ -108,6 +109,7 @@ const config: HardhatUserConfig = {
       rinkeby: process.env.ETHERSCAN_API_KEY || "",
       kovan: process.env.ETHERSCAN_API_KEY || "",
       goerli: process.env.ETHERSCAN_API_KEY || "",
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
     },
   },
   networks: {
@@ -132,6 +134,7 @@ const config: HardhatUserConfig = {
     rinkeby: getChainConfig("rinkeby"),
     kovan: getChainConfig("kovan"),
     goerli: getChainConfig("goerli"),
+    sepolia: getChainConfig("sepolia"),
   },
   paths: {
     artifacts: "./artifacts",
