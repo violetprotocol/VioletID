@@ -204,6 +204,10 @@ contract VioletID is
         _unassignMultipleStatuses(account, statusCombinationId);
     }
 
+    function updateVerifier(address newVerifier) external onlyRole(OWNER_ROLE) {
+        setVerifier(newVerifier);
+    }
+
     /**
      * @dev See {UUPSUpgradeable-_authorizeUpgrade}
      *
