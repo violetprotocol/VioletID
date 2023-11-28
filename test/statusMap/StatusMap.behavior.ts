@@ -23,15 +23,11 @@ export function shouldBehaveLikeStatusMap(): void {
       });
 
       it("should return true", async function () {
-        expect(
-          await this.statusMap.callStatic.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
-        ).to.be.true;
+        expect(await this.statusMap.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
       });
 
       it("should return false", async function () {
-        expect(
-          await this.statusMap.callStatic.isStatusSet(this.signers.user.address, Status.IS_INDIVIDUAL),
-        ).to.be.false;
+        expect(await this.statusMap.isStatusSet(this.signers.user.address, Status.IS_INDIVIDUAL)).to.be.false;
       });
     });
   });
@@ -44,16 +40,13 @@ export function shouldBehaveLikeStatusMap(): void {
 
       it("should return true", async function () {
         expect(
-          await this.statusMap.callStatic.areStatusesSet(
-            this.signers.user.address,
-            INDIVIDUAL_US_ACCREDITED_COMBINATION_ID,
-          ),
+          await this.statusMap.areStatusesSet(this.signers.user.address, INDIVIDUAL_US_ACCREDITED_COMBINATION_ID),
         ).to.be.true;
       });
 
       it("should return false", async function () {
         expect(
-          await this.statusMap.callStatic.areStatusesSet(
+          await this.statusMap.areStatusesSet(
             this.signers.user.address,
             getStatusCombinationId([Status.IS_BUSINESS, Status.REGISTERED_WITH_VIOLET]),
           ),
@@ -67,8 +60,7 @@ export function shouldBehaveLikeStatusMap(): void {
       await expect(this.statusMap.overwriteStatusTo(this.signers.user.address, Status.REGISTERED_WITH_VIOLET, true)).to
         .not.be.reverted;
 
-      expect(await this.statusMap.callStatic.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to
-        .be.true;
+      expect(await this.statusMap.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
     });
 
     it("should successfully unset status", async function () {
@@ -78,8 +70,7 @@ export function shouldBehaveLikeStatusMap(): void {
       await expect(this.statusMap.overwriteStatusTo(this.signers.user.address, Status.REGISTERED_WITH_VIOLET, false)).to
         .not.be.reverted;
 
-      expect(await this.statusMap.callStatic.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to
-        .be.false;
+      expect(await this.statusMap.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.be.false;
     });
   });
 
@@ -93,7 +84,7 @@ export function shouldBehaveLikeStatusMap(): void {
       ).to.not.be.reverted;
 
       expect(
-        await this.statusMap.callStatic.areStatusesSet(
+        await this.statusMap.areStatusesSet(
           this.signers.user.address,
           getStatusCombinationId([Status.REGISTERED_WITH_VIOLET, Status.IS_INDIVIDUAL]),
         ),
@@ -106,8 +97,7 @@ export function shouldBehaveLikeStatusMap(): void {
       await expect(this.statusMap.assignStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.not.be
         .reverted;
 
-      expect(await this.statusMap.callStatic.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to
-        .be.true;
+      expect(await this.statusMap.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
     });
   });
 
@@ -122,9 +112,7 @@ export function shouldBehaveLikeStatusMap(): void {
           this.statusMap.unassignStatus(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
         ).to.not.be.reverted;
 
-        expect(
-          await this.statusMap.callStatic.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET),
-        ).to.be.false;
+        expect(await this.statusMap.isStatusSet(this.signers.user.address, Status.REGISTERED_WITH_VIOLET)).to.be.false;
       });
     });
   });
@@ -142,9 +130,7 @@ export function shouldBehaveLikeStatusMap(): void {
       it("should return the correct status combination id from list of statuses", async function () {
         statusesList.forEach(async (statuses) => {
           const combinationId = getStatusCombinationId(statuses);
-          expect(await this.statusMap.callStatic.getStatusesFromCombinationId(combinationId)).to.deep.equal(
-            statusesList.sort(),
-          );
+          expect(await this.statusMap.getStatusesFromCombinationId(combinationId)).to.deep.equal(statusesList.sort());
         });
       });
     });
@@ -153,7 +139,7 @@ export function shouldBehaveLikeStatusMap(): void {
       it("should return the correct statuses from a combination id", async function () {
         statusesList.forEach(async (statuses) => {
           const combinationId = getStatusCombinationId(statuses);
-          expect(await this.statusMap.callStatic.getStatusCombinationId(statuses)).to.equal(combinationId);
+          expect(await this.statusMap.getStatusCombinationId(statuses)).to.equal(combinationId);
         });
       });
     });

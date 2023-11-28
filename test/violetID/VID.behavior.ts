@@ -1,10 +1,10 @@
 import { expect } from "chai";
-import { utils } from "ethers";
-import { toUtf8Bytes } from "ethers/lib/utils";
+import { ZeroAddress, id, keccak256 } from "ethers";
 
-import { VioletID, VioletID__factory } from "../../src/types";
 import { generateAccessToken } from "../utils/generateAccessToken";
 import { getStatusCombinationId } from "../utils/getStatusCombinationId";
+import { ethers } from "hardhat";
+import { VioletIDv1_4_0, VioletIDv1_4_0__factory } from "../../src/types";
 
 enum Status {
   REGISTERED_WITH_VIOLET = 1,
@@ -26,8 +26,8 @@ const BUSINESS_REGISTERED_WITH_VIOLET_COMBINATION_ID = getStatusCombinationId([
 
 const NEW_VERIFIER = "0x33FaabBe19057C30d1405Fd8d16039255ff7EEf4";
 
-const OWNER_ROLE = utils.keccak256(toUtf8Bytes("OWNER_ROLE"));
-const ADMIN_ROLE = utils.keccak256(toUtf8Bytes("ADMIN_ROLE"));
+const OWNER_ROLE = id("OWNER_ROLE");
+const ADMIN_ROLE = id("ADMIN_ROLE");
 
 export function shouldBehaveLikeVioletID(): void {
   describe("EIP-165", async function () {
@@ -35,33 +35,38 @@ export function shouldBehaveLikeVioletID(): void {
     const violetIDInterfaceId = "0x452ddea2";
 
     it("should support interface eip-165", async function () {
-      expect(await this.violetID.callStatic.supportsInterface(eip165InterfaceId)).to.be.true;
+      expect(await this.violetID.supportsInterface(eip165InterfaceId)).to.be.true;
     });
 
     it("should support violetID interface", async function () {
-      expect(await this.violetID.callStatic.supportsInterface(violetIDInterfaceId)).to.be.true;
+      expect(await this.violetID.supportsInterface(violetIDInterfaceId)).to.be.true;
     });
 
     it("should not support invalid interface", async function () {
       const invalidInterface = "0xffffffff";
 
-      expect(await this.violetID.callStatic.supportsInterface(invalidInterface)).to.be.false;
+      expect(await this.violetID.supportsInterface(invalidInterface)).to.be.false;
     });
   });
 
   describe("upgrades", async function () {
     describe("_authorizeUpgrade", async function () {
       it("should successfully upgrade from owner", async function () {
-        const VioletIDFactory: VioletID__factory = <VioletID__factory>await ethers.getContractFactory("VioletID");
-        const violetID: VioletID = await VioletIDFactory.deploy();
-        await violetID.deployed();
+        const VioletIDFactory: VioletIDv1_4_0__factory = <VioletIDv1_4_0__factory>(
+          await ethers.getContractFactory("VioletIDv1_4_0")
+        );
+        const violetID: VioletIDv1_4_0 = await VioletIDFactory.deploy();
+        await violetID.waitForDeployment();
 
-        await expect(this.violetID.connect(this.signers.owner).upgradeTo(violetID.address)).to.not.be.reverted;
+        await expect(this.violetID.connect(this.signers.owner).upgradeTo(await violetID.getAddress())).to.not.be
+          .reverted;
       });
 
       it("should fail to upgrade from non owner", async function () {
-        await expect(this.violetID.connect(this.signers.admin).upgradeTo(this.violetID.address)).to.be.revertedWith(
-          `AccessControl: account ${this.signers.admin.address.toLowerCase()} is missing role ${await this.violetID.callStatic.OWNER_ROLE()}`,
+        const adminAddress = String(await this.signers.admin.getAddress()).toLowerCase();
+
+        await expect(this.violetID.connect(this.signers.admin).upgradeTo(ZeroAddress)).to.be.revertedWith(
+          `AccessControl: account ${adminAddress} is missing role ${await this.violetID.OWNER_ROLE()}`,
         );
       });
     });
@@ -105,7 +110,7 @@ export function shouldBehaveLikeVioletID(): void {
 
       it("should fail to pause from non-owner", async function () {
         await expect(this.violetID.connect(this.signers.admin).pause()).to.be.revertedWith(
-          `AccessControl: account ${this.signers.admin.address.toLowerCase()} is missing role ${await this.violetID.callStatic.OWNER_ROLE()}`,
+          `AccessControl: account ${this.signers.admin.address.toLowerCase()} is missing role ${await this.violetID.OWNER_ROLE()}`,
         );
 
         await expect(
@@ -144,7 +149,7 @@ export function shouldBehaveLikeVioletID(): void {
 
         it("should fail to unpause from non-owner", async function () {
           await expect(this.violetID.connect(this.signers.admin).unpause()).to.be.revertedWith(
-            `AccessControl: account ${this.signers.admin.address.toLowerCase()} is missing role ${await this.violetID.callStatic.OWNER_ROLE()}`,
+            `AccessControl: account ${this.signers.admin.address.toLowerCase()} is missing role ${await this.violetID.OWNER_ROLE()}`,
           );
 
           await expect(
@@ -197,18 +202,18 @@ export function shouldBehaveLikeVioletID(): void {
 
   describe("setVerifier", async function () {
     it("should successfully set new verifier", async function () {
-      const VioletIDFactory: VioletID__factory = <VioletID__factory>await ethers.getContractFactory("VioletID");
-      const violetID: VioletID = await VioletIDFactory.deploy();
-      await violetID.deployed();
+      // const VioletIDFactory: VioletID__factory = <VioletID__factory>await ethers.getContractFactory("VioletID");
+      // const violetID: VioletID = await VioletIDFactory.deploy();
+      // await violetID.deployed();
 
       await expect(this.violetID.connect(this.signers.owner).updateVerifier(NEW_VERIFIER)).to.not.be.reverted;
 
       expect(await this.violetID.verifier()).to.equals(NEW_VERIFIER);
     });
     it("should not allow verifier to be changed by non-owner", async function () {
-      const VioletIDFactory: VioletID__factory = <VioletID__factory>await ethers.getContractFactory("VioletID");
-      const violetID: VioletID = await VioletIDFactory.deploy();
-      await violetID.deployed();
+      // const VioletIDFactory: VioletID__factory = <VioletID__factory>await ethers.getContractFactory("VioletID");
+      // const violetID: VioletID = await VioletIDFactory.deploy();
+      // await violetID.deployed();
 
       const originalVerifier = await this.violetID.verifier();
       await expect(this.violetID.connect(this.signers.user).updateVerifier(NEW_VERIFIER)).to.be.reverted;
@@ -220,7 +225,7 @@ export function shouldBehaveLikeVioletID(): void {
   describe("claimStatuses", async function () {
     context("EOA target", async function () {
       it("with proper EAT should succeed", async function () {
-        const claimStatusesFunctionSignature = "claimStatuses(uint8,bytes32,bytes32,uint256,address,uint256)";
+        const claimStatusesFunctionSignature = "claimStatuses";
 
         const { eat, expiry } = await generateAccessToken(
           this.signers.owner,
@@ -289,29 +294,29 @@ export function shouldBehaveLikeVioletID(): void {
     context("Contract target", async function () {
       it("as admin should succeed", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).grantStatus(this.mockVIDReceiver.address, Status.IS_INDIVIDUAL),
+          this.violetID.connect(this.signers.admin).grantStatus(this.mockVIDReceiverAddress, Status.IS_INDIVIDUAL),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_INDIVIDUAL)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_INDIVIDUAL)).to.be.true;
       });
 
       it("granting twice should have no adverse effect", async function () {
         await expect(
-          this.violetID.connect(this.signers.admin).grantStatus(this.mockVIDReceiver.address, Status.IS_INDIVIDUAL),
+          this.violetID.connect(this.signers.admin).grantStatus(this.mockVIDReceiverAddress, Status.IS_INDIVIDUAL),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_INDIVIDUAL)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_INDIVIDUAL)).to.be.true;
 
         await expect(
-          this.violetID.connect(this.signers.admin).grantStatus(this.mockVIDReceiver.address, Status.IS_INDIVIDUAL),
+          this.violetID.connect(this.signers.admin).grantStatus(this.mockVIDReceiverAddress, Status.IS_INDIVIDUAL),
         ).to.not.be.reverted;
 
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_INDIVIDUAL)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_INDIVIDUAL)).to.be.true;
       });
 
       it("as owner should fail", async function () {
         await expect(
-          this.violetID.connect(this.signers.owner).grantStatus(this.mockVIDReceiver.address, Status.IS_INDIVIDUAL),
+          this.violetID.connect(this.signers.owner).grantStatus(this.mockVIDReceiverAddress, Status.IS_INDIVIDUAL),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -319,7 +324,7 @@ export function shouldBehaveLikeVioletID(): void {
 
       it("as user should fail", async function () {
         await expect(
-          this.violetID.connect(this.signers.user).grantStatus(this.mockVIDReceiver.address, Status.IS_INDIVIDUAL),
+          this.violetID.connect(this.signers.user).grantStatus(this.mockVIDReceiverAddress, Status.IS_INDIVIDUAL),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
@@ -518,23 +523,21 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+            .grantStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.not.be.reverted;
 
-        expect(
-          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
-        ).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
       });
 
       it("as admin should succeed", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+            .revokeStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.not.be.reverted;
 
         expect(
-          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+          await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.be.false;
       });
 
@@ -542,45 +545,41 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .revokeStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+            .revokeStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(
-          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
-        ).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
       });
 
       it("as user should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .revokeStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+            .revokeStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(
-          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
-        ).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
       });
 
       it("revoking twice should have no adverse effect", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+            .revokeStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.not.be.reverted;
 
         expect(
-          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+          await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.be.false;
 
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+            .revokeStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.not.be.reverted;
       });
     });
@@ -709,12 +708,10 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatuses(this.mockVIDReceiver.address, initialCombinationIdOfStatuses),
+            .grantStatuses(this.mockVIDReceiverAddress, initialCombinationIdOfStatuses),
         ).to.not.be.reverted;
 
-        expect(
-          await this.violetID.callStatic.hasStatuses(this.mockVIDReceiver.address, initialCombinationIdOfStatuses),
-        ).to.be.true;
+        expect(await this.violetID.hasStatuses(this.mockVIDReceiverAddress, initialCombinationIdOfStatuses)).to.be.true;
       });
 
       // Subset of statuses to revoke
@@ -725,44 +722,40 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
+            .revokeStatuses(this.mockVIDReceiverAddress, combinationIdOfStatusesToRevoke),
         ).to.not.be.reverted;
         // Revoked statuses
         expect(
-          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+          await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.be.false;
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US)).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US)).to.be.false;
         // Untouched statuses
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_BUSINESS)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_BUSINESS)).to.be.true;
       });
 
       it("as owner should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.owner)
-            .revokeStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
+            .revokeStatuses(this.mockVIDReceiverAddress, combinationIdOfStatusesToRevoke),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.owner.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(
-          await this.violetID.hasStatuses(this.mockVIDReceiver.address, initialCombinationIdOfStatuses),
-        ).to.be.true;
+        expect(await this.violetID.hasStatuses(this.mockVIDReceiverAddress, initialCombinationIdOfStatuses)).to.be.true;
       });
 
       it("as user should fail", async function () {
         await expect(
           this.violetID
             .connect(this.signers.user)
-            .revokeStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
+            .revokeStatuses(this.mockVIDReceiverAddress, combinationIdOfStatusesToRevoke),
         ).to.be.revertedWith(
           `AccessControl: account ${this.signers.user.address.toLowerCase()} is missing role ${ADMIN_ROLE}`,
         );
 
-        expect(
-          await this.violetID.hasStatuses(this.mockVIDReceiver.address, initialCombinationIdOfStatuses),
-        ).to.be.true;
+        expect(await this.violetID.hasStatuses(this.mockVIDReceiverAddress, initialCombinationIdOfStatuses)).to.be.true;
       });
 
       it("revoking a status the address does not have should have no adverse effect", async function () {
@@ -770,56 +763,54 @@ export function shouldBehaveLikeVioletID(): void {
         const combinationId = getStatusCombinationId([Status.IS_US, Status.IS_INDIVIDUAL]);
 
         await expect(
-          this.violetID.connect(this.signers.admin).revokeStatuses(this.mockVIDReceiver.address, combinationId),
+          this.violetID.connect(this.signers.admin).revokeStatuses(this.mockVIDReceiverAddress, combinationId),
         ).to.not.be.reverted;
 
         // Revoked statuses
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US)).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US)).to.be.false;
         // Untouched statuses
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_INDIVIDUAL)).to.be.false;
-        expect(
-          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
-        ).to.be.true;
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_BUSINESS)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_INDIVIDUAL)).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_BUSINESS)).to.be.true;
       });
 
       it("revoking twice should have no adverse effect", async function () {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
+            .revokeStatuses(this.mockVIDReceiverAddress, combinationIdOfStatusesToRevoke),
         ).to.not.be.reverted;
 
         expect(
-          await this.violetID.hasStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
+          await this.violetID.hasStatuses(this.mockVIDReceiverAddress, combinationIdOfStatusesToRevoke),
         ).to.be.false;
         // Revoked statuses
         expect(
-          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+          await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.be.false;
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US)).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US)).to.be.false;
         // Untouched statuses
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_BUSINESS)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_BUSINESS)).to.be.true;
 
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .revokeStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
+            .revokeStatuses(this.mockVIDReceiverAddress, combinationIdOfStatusesToRevoke),
         ).to.not.be.reverted;
 
         expect(
-          await this.violetID.hasStatuses(this.mockVIDReceiver.address, combinationIdOfStatusesToRevoke),
+          await this.violetID.hasStatuses(this.mockVIDReceiverAddress, combinationIdOfStatusesToRevoke),
         ).to.be.false;
         // Revoked statuses
         expect(
-          await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US_ACCREDITED_INVESTOR),
+          await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US_ACCREDITED_INVESTOR),
         ).to.be.false;
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_US)).to.be.false;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_US)).to.be.false;
         // Untouched statuses
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.REGISTERED_WITH_VIOLET)).to.be.true;
-        expect(await this.violetID.hasStatus(this.mockVIDReceiver.address, Status.IS_BUSINESS)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.REGISTERED_WITH_VIOLET)).to.be.true;
+        expect(await this.violetID.hasStatus(this.mockVIDReceiverAddress, Status.IS_BUSINESS)).to.be.true;
       });
     });
   });
@@ -854,19 +845,19 @@ export function shouldBehaveLikeVioletID(): void {
         await expect(
           this.violetID
             .connect(this.signers.admin)
-            .grantStatus(this.mockVIDReceiver.address, Status.REGISTERED_WITH_VIOLET),
+            .grantStatus(this.mockVIDReceiverAddress, Status.REGISTERED_WITH_VIOLET),
         ).to.not.be.reverted;
 
         expect(
           await this.violetID
             .connect(this.signers.user)
-            .hasStatus(this.mockVIDReceiver.address, Status.REGISTERED_WITH_VIOLET),
+            .hasStatus(this.mockVIDReceiverAddress, Status.REGISTERED_WITH_VIOLET),
         ).to.be.true;
       });
 
       it("contract should not have status not granted", async function () {
         expect(
-          await this.violetID.connect(this.signers.user).hasStatus(this.mockVIDReceiver.address, Status.IS_BUSINESS),
+          await this.violetID.connect(this.signers.user).hasStatus(this.mockVIDReceiverAddress, Status.IS_BUSINESS),
         ).to.be.false;
       });
     });

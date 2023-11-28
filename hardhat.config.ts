@@ -1,3 +1,4 @@
+import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-ledger";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-verify";
@@ -27,6 +28,10 @@ if (!privateKey && !mnemonic && !ledgerAddress) {
 const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;
 if (!infuraApiKey) {
   throw new Error("Please set your INFURA_API_KEY in a .env file");
+}
+
+if (!process.env.DEFENDER_API_SECRET) {
+  throw new Error("Please set your DEFENDER_API_SECRET in a .env file");
 }
 
 const chainIds = {
