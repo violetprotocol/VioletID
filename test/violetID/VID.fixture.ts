@@ -15,7 +15,8 @@ export async function deployVioletIDFixture(): Promise<{
   mockVIDReceiverAddress: string;
   eatVerifier: AccessTokenVerifier;
 }> {
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore: getSigners() exists, see https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-ethers#helpers
   const signers = await ethers.getSigners();
   const owner = signers[0];
   const admin = signers[1];

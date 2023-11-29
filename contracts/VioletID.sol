@@ -23,6 +23,7 @@ error BatchSetStatusArrayMismatch();
  *      - Upgradeable
  *      - Ethereum Access Token compatible
  */
+// solhint-disable-next-line contract-name-camelcase
 contract VioletIDv1_4_0 is
     Initializable,
     AccessControlUpgradeable,

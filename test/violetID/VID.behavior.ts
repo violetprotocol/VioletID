@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ZeroAddress, id, keccak256 } from "ethers";
+import { ZeroAddress, id } from "ethers";
 
 import { generateAccessToken } from "../utils/generateAccessToken";
 import { getStatusCombinationId } from "../utils/getStatusCombinationId";
