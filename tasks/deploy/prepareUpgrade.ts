@@ -1,6 +1,6 @@
+import { ContractFactory } from "ethers";
 import { task } from "hardhat/config";
 import type { TaskArguments } from "hardhat/types";
-import { ContractFactory } from "ethers";
 
 // 💡 Make sure to delete /artifacts and /cache and then run `yarn compile` before running this task,
 // and that you have specified the right Etherscan API key in .env.

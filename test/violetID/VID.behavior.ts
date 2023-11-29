@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { ZeroAddress, id } from "ethers";
+import { ethers } from "hardhat";
 
+import { VioletIDv1_4_0, VioletIDv1_4_0__factory } from "../../src/types";
 import { generateAccessToken } from "../utils/generateAccessToken";
 import { getStatusCombinationId } from "../utils/getStatusCombinationId";
-import { ethers } from "hardhat";
-import { VioletIDv1_4_0, VioletIDv1_4_0__factory } from "../../src/types";
 
 enum Status {
   REGISTERED_WITH_VIOLET = 1,

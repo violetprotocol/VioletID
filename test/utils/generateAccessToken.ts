@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { messages, utils } from "@violetprotocol/ethereum-access-token-helpers";
-import { BigNumberish, Contract, Wallet, Signature, getAddress } from "ethers";
+import { BigNumberish, Contract, Signature, Wallet, getAddress } from "ethers";
 
 import { VioletIDv1_4_0 } from "../../src/types";
 
