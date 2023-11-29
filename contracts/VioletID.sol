@@ -12,6 +12,8 @@ import {
 import { IVioletID } from "./IVioletID.sol";
 import { StatusMap } from "./StatusMap.sol";
 
+error BatchSetStatusArrayMismatch();
+
 /**
  * @dev VioletID contract
  *
@@ -21,7 +23,8 @@ import { StatusMap } from "./StatusMap.sol";
  *      - Upgradeable
  *      - Ethereum Access Token compatible
  */
-contract VioletID is
+// solhint-disable-next-line contract-name-camelcase
+contract VioletIDv1_4_0 is
     Initializable,
     AccessControlUpgradeable,
     PausableUpgradeable,
@@ -120,7 +123,7 @@ contract VioletID is
         address account,
         uint256 statusCombinationId
     ) public requiresAuth(v, r, s, expiry) whenNotPaused {
-        _setMultipleStatuses(account, statusCombinationId);
+        _assignMultipleStatuses(account, statusCombinationId);
     }
 
     /**
@@ -130,7 +133,7 @@ contract VioletID is
      * Only callable by ADMIN_ROLE
      */
     function grantStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        _setStatus(account, statusId);
+        _assignStatus(account, statusId);
     }
 
     /**
@@ -143,7 +146,40 @@ contract VioletID is
         address account,
         uint256 statusCombinationId
     ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        _setMultipleStatuses(account, statusCombinationId);
+        _assignMultipleStatuses(account, statusCombinationId);
+    }
+
+    /**
+     * @dev See {IVioletID-setStatuses}
+     *
+     * Only callable if contract is not paused
+     * Only callable by ADMIN_ROLE
+     */
+    function setStatuses(
+        address account,
+        uint256 statusCombinationId
+    ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        _overwriteMultipleStatuses(account, statusCombinationId);
+    }
+
+    /**
+     * @dev See {IVioletID-batchSetStatuses}
+     *
+     * Only callable if contract is not paused
+     * Only callable by ADMIN_ROLE
+     */
+    function batchSetStatuses(
+        address[] calldata accountArray,
+        uint256[] calldata statusCombinationIdArray
+    ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
+        uint256 length = accountArray.length;
+        if (length != statusCombinationIdArray.length) revert BatchSetStatusArrayMismatch();
+        for (uint256 i = 0; i < length; ) {
+            _overwriteMultipleStatuses(accountArray[i], statusCombinationIdArray[i]);
+            unchecked {
+                i++;
+            }
+        }
     }
 
     /**
@@ -153,7 +189,7 @@ contract VioletID is
      * Only callable by ADMIN_ROLE
      */
     function revokeStatus(address account, uint8 statusId) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        _unsetStatus(account, statusId);
+        _unassignStatus(account, statusId);
     }
 
     /**
@@ -166,7 +202,11 @@ contract VioletID is
         address account,
         uint256 statusCombinationId
     ) public override onlyRole(ADMIN_ROLE) whenNotPaused {
-        _unsetMultipleStatuses(account, statusCombinationId);
+        _unassignMultipleStatuses(account, statusCombinationId);
+    }
+
+    function updateVerifier(address newVerifier) external onlyRole(OWNER_ROLE) {
+        setVerifier(newVerifier);
     }
 
     /**

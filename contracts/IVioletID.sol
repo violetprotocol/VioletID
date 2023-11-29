@@ -61,10 +61,29 @@ interface IVioletID {
      * Must set each status id contained by `statusCombinationId` to the `account`
      *
      * Status combination id is a single number that combines statuses through assigning or
-     * unassigning bits in a uint256 value by index of bit. The statusId of each status being assigned
-     * represents the bit index.
+     * unassigning bits in a uint256 value by index of bit. The statusId of each status being
+     * assigned represents the bit index.
      */
     function grantStatuses(address account, uint256 statusCombinationId) external;
+
+    /**
+     * @dev Sets a combination of statuses as `statusCombinationId` to `account`
+     *
+     * Must set each status id contained by `statusCombinationId` to the `account`
+     * Unlike grantStatuses which can only sets statuses to true (regardless of
+     * their current value), this method completely overwrites the value of ALL
+     * statuses of the account and sets them as what is passed as statusCombinationId.
+     * As a result, be careful not to accidentally revoke a previously granted status using this method.
+     **/
+    function setStatuses(address account, uint256 statusCombinationId) external;
+
+    /**
+     * @dev Sets an array of combination of statuses as `statusCombinationIdArray` to an array of
+     * accounts as `accountArray`
+     *
+     * The account will be assigned the statusCombinationId in their respective array positions
+     **/
+    function batchSetStatuses(address[] calldata accountArray, uint256[] calldata statusCombinationIdArray) external;
 
     /**
      * @dev Revokes a `statusId` from `account`

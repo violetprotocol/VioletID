@@ -1,38 +1,35 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { messages, utils } from "@violetprotocol/ethereum-access-token-helpers";
-import { BigNumber, Contract, Wallet } from "ethers";
-import { splitSignature } from "ethers/lib/utils";
-import { ethers } from "hardhat";
+import { BigNumberish, Contract, Signature, Wallet, getAddress } from "ethers";
 
-import { VioletID } from "../../src/types";
+import { VioletIDv1_4_0 } from "../../src/types";
 
 export const generateAccessToken = async (
   signer: SignerWithAddress,
   verifyingContract: Contract,
-  functionSignature: string,
+  functionSignature: Parameters<VioletIDv1_4_0["interface"]["getFunction"]>[0],
   caller: Wallet | SignerWithAddress,
-  contract: VioletID,
-  parameters: string | BigNumber[],
-  expiry?: BigNumber,
+  contract: VioletIDv1_4_0,
+  parameters: string | BigNumberish[],
+  expiry?: BigNumberish,
 ) => {
   const token = {
     functionCall: {
-      functionSignature: contract.interface.getSighash(functionSignature),
-      target: ethers.utils.getAddress(contract.address),
-      caller: ethers.utils.getAddress(caller.address),
-      parameters: utils.packParameters(contract.interface, functionSignature, parameters),
+      functionSignature: contract.interface.getFunction(functionSignature).selector,
+      target: await contract.getAddress(),
+      caller: getAddress(caller.address),
+      parameters: utils.packParameters(contract.interface, functionSignature, parameters as any[]),
     },
-    expiry: expiry || BigNumber.from(4833857428),
+    expiry: expiry || BigInt(4833857428),
   };
 
   const domain: messages.Domain = {
-    verifyingContract: verifyingContract.address,
+    verifyingContract: await verifyingContract.getAddress(),
     name: "Ethereum Access Token",
     version: "1",
-    chainId: await signer.getChainId(),
+    chainId: Number((await signer.provider.getNetwork()).chainId),
   };
-
-  const eat = splitSignature(await utils.signAccessToken(signer, domain, token));
+  const eat = Signature.from(await utils.signAccessToken(signer, domain, token));
 
   return { eat, expiry: token.expiry };
 };

@@ -9,7 +9,7 @@ export async function deployStatusMapFixture(): Promise<{
     await ethers.getContractFactory("MockStatusMap")
   );
   const statusMap: MockStatusMap = <MockStatusMap>await StatusMapFactory.deploy();
-  await statusMap.deployed();
+  await statusMap.waitForDeployment();
 
   return { statusMap };
 }

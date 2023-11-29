@@ -27,40 +27,47 @@ contract StatusMap {
     /**
      * @dev Sets the bit at `index` to the boolean `value` for the account `account`.
      */
-    function _setStatusTo(address account, uint256 index, bool value) internal {
+    function _overwriteStatusTo(address account, uint256 index, bool value) internal {
         if (value) {
-            _setStatus(account, index);
+            _assignStatus(account, index);
         } else {
-            _unsetStatus(account, index);
+            _unassignStatus(account, index);
         }
+    }
+
+    /**
+     * @dev Sets multiple bits to 1 for the account `account` using a provided `indicesMask`.
+     */
+    function _assignMultipleStatuses(address account, uint256 indicesMask) internal {
+        statusesByAccount[account] |= indicesMask;
     }
 
     /**
      * @dev Sets multiple bits for the account `account` using a provided `indicesMask`.
      */
-    function _setMultipleStatuses(address account, uint256 indicesMask) internal {
-        statusesByAccount[account] |= indicesMask;
+    function _overwriteMultipleStatuses(address account, uint256 indicesMask) internal {
+        statusesByAccount[account] = indicesMask;
     }
 
     /**
-     * @dev Sets the bit at `index` for the account `account`.
+     * @dev Sets the bit at `index` to 1 for the account `account`.
      */
-    function _setStatus(address account, uint256 index) internal {
+    function _assignStatus(address account, uint256 index) internal {
         uint256 mask = 1 << (index);
         statusesByAccount[account] |= mask;
     }
 
     /**
-     * @dev Unsets multiple bits for the account `account` using a provided `indicesMask`.
+     * @dev Sets multiple bits to 0 for the account `account` using a provided `indicesMask`.
      */
-    function _unsetMultipleStatuses(address account, uint256 indicesMask) internal {
+    function _unassignMultipleStatuses(address account, uint256 indicesMask) internal {
         statusesByAccount[account] &= ~indicesMask;
     }
 
     /**
-     * @dev Unsets the bit at `index` for the account `account`.
+     * @dev Sets the bit at `index` to 0 for the account `account`.
      */
-    function _unsetStatus(address account, uint256 index) internal {
+    function _unassignStatus(address account, uint256 index) internal {
         uint256 mask = 1 << index;
         statusesByAccount[account] &= ~mask;
     }

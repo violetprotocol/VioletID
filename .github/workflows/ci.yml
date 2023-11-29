@@ -4,6 +4,7 @@ env:
   DOTENV_CONFIG_PATH: "./.env.example"
   MNEMONIC: "lava elegant rate reveal test size bachelor cross skin law all witness world spice clown"
   INFURA_API_KEY: "mock_infura_api_key"
+  DEFENDER_API_SECRET: "mock_defender_secret"
 
 on:
   workflow_dispatch:

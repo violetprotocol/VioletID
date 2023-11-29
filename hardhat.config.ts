@@ -1,6 +1,7 @@
+import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-ledger";
 import "@nomicfoundation/hardhat-toolbox";
-import "@nomiclabs/hardhat-etherscan";
+import "@nomicfoundation/hardhat-verify";
 import "@openzeppelin/hardhat-upgrades";
 import { config as dotenvConfig } from "dotenv";
 import * as ethers from "ethers";
@@ -27,6 +28,10 @@ if (!privateKey && !mnemonic && !ledgerAddress) {
 const infuraApiKey: string | undefined = process.env.INFURA_API_KEY;
 if (!infuraApiKey) {
   throw new Error("Please set your INFURA_API_KEY in a .env file");
+}
+
+if (!process.env.DEFENDER_API_SECRET) {
+  throw new Error("Please set your DEFENDER_API_SECRET in a .env file");
 }
 
 const chainIds = {
@@ -91,6 +96,11 @@ const config: HardhatUserConfig = {
     excludeContracts: [],
     src: "./contracts",
   },
+  defender: {
+    apiKey: process.env.DEFENDER_API_KEY || "",
+    apiSecret: process.env.DEFENDER_API_SECRET || "",
+    useDefenderDeploy: true,
+  },
   etherscan: {
     apiKey: {
       arbitrumOne: process.env.ARBISCAN_API_KEY || "",
@@ -122,7 +132,7 @@ const config: HardhatUserConfig = {
     optimism: getChainConfig("optimism-mainnet"),
     optimismGoerli: {
       ...getChainConfig("optimism-goerli"),
-      gasPrice: ethers.utils.parseUnits("2", "gwei").toNumber(),
+      gasPrice: Number(ethers.parseUnits("2", "gwei")),
     },
     polygon: getChainConfig("polygon-mainnet"),
     polygonMumbai: getChainConfig("polygon-mumbai"),
@@ -161,7 +171,7 @@ const config: HardhatUserConfig = {
   },
   typechain: {
     outDir: "src/types",
-    target: "ethers-v5",
+    target: "ethers-v6",
   },
 };
 
