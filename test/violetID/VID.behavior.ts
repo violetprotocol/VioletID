@@ -202,19 +202,11 @@ export function shouldBehaveLikeVioletID(): void {
 
   describe("setVerifier", async function () {
     it("should successfully set new verifier", async function () {
-      // const VioletIDFactory: VioletID__factory = <VioletID__factory>await ethers.getContractFactory("VioletID");
-      // const violetID: VioletID = await VioletIDFactory.deploy();
-      // await violetID.deployed();
-
       await expect(this.violetID.connect(this.signers.owner).updateVerifier(NEW_VERIFIER)).to.not.be.reverted;
 
       expect(await this.violetID.verifier()).to.equals(NEW_VERIFIER);
     });
     it("should not allow verifier to be changed by non-owner", async function () {
-      // const VioletIDFactory: VioletID__factory = <VioletID__factory>await ethers.getContractFactory("VioletID");
-      // const violetID: VioletID = await VioletIDFactory.deploy();
-      // await violetID.deployed();
-
       const originalVerifier = await this.violetID.verifier();
       await expect(this.violetID.connect(this.signers.user).updateVerifier(NEW_VERIFIER)).to.be.reverted;
       expect(await this.violetID.verifier()).to.equals(originalVerifier);
