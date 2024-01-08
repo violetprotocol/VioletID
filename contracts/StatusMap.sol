@@ -106,7 +106,7 @@ contract StatusMap {
     function getStatusCombinationId(uint8[] calldata statusIds) external pure returns (uint256 indicesMask) {
         for (uint256 i = 0; i < statusIds.length; i++) {
             uint256 status = 1 << statusIds[i];
-            indicesMask += status;
+            indicesMask |= status;
         }
     }
 }
