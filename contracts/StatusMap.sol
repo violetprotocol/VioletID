@@ -80,7 +80,7 @@ contract StatusMap {
         uint8[256] memory tempStatusArray;
 
         // iterate indices of bits as long as indicesMask has a value
-        for (uint8 i = 0; indicesMask > 0; i++) {
+        for (uint8 i = 0; indicesMask > 0; ++i) {
             // If statusCombination has a value at the current bit then a status is set, record it in temp array
             if (indicesMask & 1 != 0) {
                 tempStatusArray[numberOfStatuses] = i;
@@ -95,7 +95,7 @@ contract StatusMap {
         statuses = new uint8[](numberOfStatuses);
 
         // store values from temp array to new array
-        for (uint8 i = 0; i < numberOfStatuses; i++) {
+        for (uint8 i = 0; i < numberOfStatuses; ++i) {
             statuses[i] = tempStatusArray[i];
         }
     }
@@ -104,7 +104,7 @@ contract StatusMap {
      * @dev Calculates the `indicesMask` given a list of status indexes as `statusIds`.
      */
     function getStatusCombinationId(uint8[] calldata statusIds) external pure returns (uint256 indicesMask) {
-        for (uint256 i = 0; i < statusIds.length; i++) {
+        for (uint256 i = 0; i < statusIds.length; ++i) {
             uint256 status = 1 << statusIds[i];
             indicesMask += status;
         }
