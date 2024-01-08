@@ -27,7 +27,7 @@ contract StatusMap {
     /**
      * @dev Sets the bit at `index` to the boolean `value` for the account `account`.
      */
-    function _overwriteStatusTo(address account, uint256 index, bool value) internal {
+    function _overwriteStatusTo(address account, uint8 index, bool value) internal {
         if (value) {
             _assignStatus(account, index);
         } else {
@@ -52,7 +52,7 @@ contract StatusMap {
     /**
      * @dev Sets the bit at `index` to 1 for the account `account`.
      */
-    function _assignStatus(address account, uint256 index) internal {
+    function _assignStatus(address account, uint8 index) internal {
         uint256 mask = 1 << (index);
         statusesByAccount[account] |= mask;
     }
@@ -67,7 +67,7 @@ contract StatusMap {
     /**
      * @dev Sets the bit at `index` to 0 for the account `account`.
      */
-    function _unassignStatus(address account, uint256 index) internal {
+    function _unassignStatus(address account, uint8 index) internal {
         uint256 mask = 1 << index;
         statusesByAccount[account] &= ~mask;
     }
