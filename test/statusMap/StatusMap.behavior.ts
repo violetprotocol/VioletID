@@ -124,22 +124,27 @@ export function shouldBehaveLikeStatusMap(): void {
       [1, 2, 3, 5, 6],
       [0, 4, 5, 6, 7, 8],
       [1, 2, 3, 4, 5, 6, 7],
+      [1, 1, 2, 2, 2], // duplicate array
     ];
+
+    const expectedCombinationIds = [91, 173, 110, 497, 510, 6];
 
     describe("getStatusesFromCombinationId", async function () {
       it("should return the correct status combination id from list of statuses", async function () {
-        statusesList.forEach(async (statuses) => {
-          const combinationId = getStatusCombinationId(statuses);
-          expect(await this.statusMap.getStatusesFromCombinationId(combinationId)).to.deep.equal(statusesList.sort());
+        statusesList.forEach(async (statuses, index) => {
+          const combinationId = expectedCombinationIds[index];
+          expect(await this.statusMap.callStatic.getStatusesFromCombinationId(combinationId)).to.deep.equal(
+            statusesList.sort(),
+          );
         });
       });
     });
 
     describe("getStatusCombinationId", async function () {
       it("should return the correct statuses from a combination id", async function () {
-        statusesList.forEach(async (statuses) => {
-          const combinationId = getStatusCombinationId(statuses);
-          expect(await this.statusMap.getStatusCombinationId(statuses)).to.equal(combinationId);
+        statusesList.forEach(async (statuses, index) => {
+          const combinationId = expectedCombinationIds[index];
+          expect(await this.statusMap.callStatic.getStatusCombinationId(statuses)).to.equal(combinationId);
         });
       });
     });
