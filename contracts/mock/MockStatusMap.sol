@@ -12,7 +12,7 @@ contract MockStatusMap is StatusMap {
         return _areStatusesSet(account, mask);
     }
 
-    function overwriteStatusTo(address account, uint256 index, bool value) public {
+    function overwriteStatusTo(address account, uint8 index, bool value) public {
         _overwriteStatusTo(account, index, value);
     }
 
@@ -20,11 +20,11 @@ contract MockStatusMap is StatusMap {
         _assignMultipleStatuses(account, indicesMask);
     }
 
-    function assignStatus(address account, uint256 index) public {
+    function assignStatus(address account, uint8 index) public {
         _assignStatus(account, index);
     }
 
-    function unassignStatus(address account, uint256 index) public {
+    function unassignStatus(address account, uint8 index) public {
         _unassignStatus(account, index);
     }
 }
