@@ -177,7 +177,7 @@ contract VioletIDv1_4_0 is
         for (uint256 i = 0; i < length; ) {
             _overwriteMultipleStatuses(accountArray[i], statusCombinationIdArray[i]);
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
